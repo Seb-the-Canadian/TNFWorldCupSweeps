@@ -1,0 +1,79 @@
+name: Build, refresh & deploy
+
+# Two triggers, one job:
+#   • push to main / manual  → just rebuild & deploy the site (e.g. after a code change)
+#   • schedule (every 5 min) → refresh live data during match windows, then deploy
+#
+# Pages is published from THIS workflow (set Settings → Pages → Source: GitHub Actions).
+# That sidesteps both the ~10-builds/hour cap (exempt for custom Actions) and the fact
+# that GITHUB_TOKEN commits don't trigger the separate pages-build-deployment workflow.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/5 * * * *"   # GitHub's minimum; expect 5–30 min drift at busy times
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit refreshed data
+  pages: write      # deploy Pages
+  id-token: write   # deploy Pages (OIDC)
+
+concurrency:
+  group: site
+  cancel-in-progress: false   # never interrupt a deploy/commit mid-flight
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ── Data refresh (schedule/manual only; skipped on plain pushes) ──
+      - name: Live-window guard
+        id: guard
+        if: github.event_name != 'push'
+        run: echo "active=$(node scripts/schedule.js)" >> "$GITHUB_OUTPUT"
+
+      - name: Refresh match data
+        if: github.event_name != 'push' && steps.guard.outputs.active == 'true'
+        run: node scripts/refresh.js
+
+      - name: Commit data if it changed
+        if: github.event_name != 'push'
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/ 2>/dev/null || true
+          if ! git diff --staged --quiet; then
+            git commit -m "data: refresh $(date -u +%FT%TZ)"
+            for i in 1 2 3; do
+              git push && break || { echo "push failed, rebasing…"; git pull --rebase --autostash origin "${GITHUB_REF_NAME}"; sleep $((2**i)); }
+            done
+          else
+            echo "no data change"
+          fi
+
+      # ── Build & deploy ──
+      - name: Validate canonical data
+        run: node scripts/check-data.js
+
+      - name: Assemble site
+        run: |
+          rm -rf _site && mkdir _site
+          cp index.html _site/
+          cp -r data _site/data
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

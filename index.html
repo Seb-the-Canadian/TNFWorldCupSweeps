@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="2026 World Cup sweepstakes pool dashboard — rankings, schedule, and group ownership for 24 participants.">
+<meta name="theme-color" content="#08101e">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="2026 World Cup Pool Dashboard">
+<meta property="og:description" content="Track our World Cup sweepstakes — rankings, schedule, and groups.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+<title>2026 WC Pool Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08101e;--surface:#0f1c2e;--surface2:#162035;--border:#1e2d45;
+  --text:#e2e8f0;--muted:#4e6080;--accent:#3b82f6;
+  --sel-color:transparent;--sel-bg:transparent;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0a1628 0%,#0d2040 50%,#0a1628 100%);
+  border-bottom:1px solid var(--border);padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-logo{font-size:26px}
+.header-title{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#f1f5f9}
+.header-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.person-pill{display:flex;align-items:center;gap:8px;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border);border-radius:20px;
+  padding:7px 14px;font-size:12px;font-weight:700;color:var(--muted);
+  transition:.15s all;white-space:nowrap}
+.person-pill:hover{border-color:#3b82f6;color:#93c5fd}
+.person-pill.chosen{color:var(--sel-color);border-color:var(--sel-color);background:var(--sel-bg)}
+.person-pill-icon{font-size:14px}
+.person-pill-clear{margin-left:4px;opacity:.5;font-size:14px;line-height:1}
+.person-pill-clear:hover{opacity:1}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.tz-select{background:var(--surface2);color:var(--text);border:1px solid var(--border);
+  border-radius:20px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.tz-select:hover{border-color:#3b82f6;color:#93c5fd}
+.tz-select:focus{outline:none;border-color:var(--accent)}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px}
+.tab-btn{padding:11px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;
+  border:none;background:none;border-bottom:2px solid transparent;transition:.15s all}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:#60a5fa;border-bottom-color:#60a5fa}
+
+/* CONTENT */
+.tab-content{display:none;padding:22px 20px;max-width:860px;margin:0 auto}
+.tab-content.active{display:block}
+
+/* RANKINGS */
+.rankings-note{font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.rank-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:9px 13px;transition:.1s all;cursor:default}
+.rank-row.selected-me{border-color:var(--sel-color)!important;background:var(--sel-bg)!important;
+  box-shadow:0 0 0 1px var(--sel-color)}
+.rank-num{width:26px;font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0;text-align:right}
+.rank-num.top{color:#fbbf24}
+.rank-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.rank-name{font-weight:700;font-size:13px;width:72px;flex-shrink:0}
+.rank-teams{font-size:12px;color:#94a3b8;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-pct{font-size:13px;font-weight:800;flex-shrink:0;min-width:50px;text-align:right}
+.rank-bar-wrap{width:110px;flex-shrink:0;height:4px;background:#0d1a2b;border-radius:3px;overflow:hidden}
+.rank-bar{height:100%;border-radius:3px}
+.tier-badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:2px 6px;border-radius:4px;flex-shrink:0;width:84px;text-align:center}
+
+/* SCHEDULE */
+.schedule-filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.schedule-filters label{font-size:12px;color:var(--muted);font-weight:600}
+.filter-select{background:var(--surface2);color:var(--text);border:1px solid var(--border);
+  border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer}
+.filter-select:focus{outline:none;border-color:var(--accent)}
+.sched-note{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.my-filter-note{font-size:11px;color:#f59e0b;margin-bottom:10px;display:none}
+.my-filter-note.visible{display:block}
+.no-results{font-size:12px;color:var(--muted);text-align:center;padding:28px 10px;display:none}
+.no-results.visible{display:block}
+
+.date-group{margin-bottom:22px}
+.date-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:8px;border-left:2px solid var(--border);padding-left:8px}
+
+.match-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:9px 13px;margin-bottom:5px;display:grid;
+  grid-template-columns:28px 1fr auto 1fr 88px;align-items:center;gap:8px;
+  transition:.1s all;border-left:3px solid transparent}
+.match-card.civil-war{border-color:#f59e0b;background:#1a1500;border-left-color:#f59e0b}
+.match-card.my-match{border-left-color:var(--sel-color)!important;background:var(--sel-bg)!important}
+.match-card.hidden{display:none}
+
+.grp-badge{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.team-side{display:flex;flex-direction:column;gap:2px}
+.team-side.right{align-items:flex-end}
+.team-name{font-size:13px;font-weight:700;color:#f1f5f9}
+.owner-tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;display:inline-block}
+.owner-tag.me{box-shadow:0 0 0 1px var(--sel-color)}
+.owner-tag.none{color:var(--muted);background:transparent;font-weight:400}
+.vs-col{text-align:center;font-size:11px;font-weight:800;color:var(--muted)}
+.civil-icon{font-size:9px;color:#f59e0b;display:block;margin-top:2px}
+.match-meta{text-align:right;font-size:10px;color:var(--muted);line-height:1.6}
+.match-meta .time{color:#94a3b8;font-weight:600}
+.sim-badge{font-size:9px;color:#f59e0b;letter-spacing:.04em}
+.est-badge{font-style:italic;color:#3d5270}
+.score{font-size:15px;font-weight:800;color:#f1f5f9;white-space:nowrap}
+.mstatus{font-size:9px;font-weight:800;letter-spacing:.05em;margin-top:1px}
+.mstatus.live{color:#f87171}
+.mstatus.ft{color:#64748b}
+.live-status{margin-bottom:12px;min-height:18px}
+.live-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#94a3b8}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.live-pill.livenow{color:#fca5a5}
+.live-pill.livenow .live-dot{background:#f87171;box-shadow:0 0 0 3px rgba(248,113,113,.22);animation:livepulse 1.4s infinite}
+.live-pill.stale{color:#f59e0b}
+.live-pill.stale .live-dot{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* GROUPS */
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(254px,1fr));gap:10px}
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.group-card-header{padding:7px 13px;font-size:11px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;background:var(--surface2)}
+.group-team-row{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 13px;border-top:1px solid var(--border);transition:.1s background}
+.group-team-row.my-team{background:var(--sel-bg)!important;border-left:2px solid var(--sel-color)}
+.group-team-name{font-size:12px;color:#e2e8f0;font-weight:600}
+.civil-marker{font-size:9px;color:#f59e0b;margin-left:3px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:#0f1c2e;border:1px solid #1e2d45;border-radius:14px;
+  padding:24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:800;color:#f1f5f9;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+.person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:7px;margin-bottom:16px}
+.person-option{padding:8px 10px;border-radius:8px;border:1px solid;cursor:pointer;
+  font-size:12px;font-weight:700;text-align:center;background:transparent;
+  transition:.12s all;line-height:1.3}
+.person-option:hover{filter:brightness(1.3);transform:translateY(-1px)}
+.person-option.active-choice{filter:brightness(1.2);box-shadow:0 0 0 2px currentColor}
+.modal-clear{width:100%;padding:9px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--muted);font-size:12px;font-weight:600;
+  cursor:pointer;transition:.1s all}
+.modal-clear:hover{border-color:#60a5fa;color:#93c5fd}
+
+/* CIVIL WAR INFO */
+.highlight-note{background:#0d1e35;border:1px solid #1e3a5f;border-radius:6px;
+  padding:10px 13px;font-size:11px;color:#7aa4cc;margin-bottom:14px;line-height:1.6}
+
+@media(max-width:580px){
+  .rank-bar-wrap,.tier-badge{display:none}
+  .match-card{grid-template-columns:22px 1fr auto 1fr 70px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">⚽</div>
+    <div>
+      <div class="header-title">2026 World Cup Pool</div>
+      <div class="header-sub">24 participants · 48 teams · Group stage: Jun 11 – Jun 27</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <select class="tz-select" id="tz-select" aria-label="Time zone" onchange="setTimezone(this.value)" title="Show match times in this time zone">
+      <option value="auto">🌐 Auto (device)</option>
+      <option value="America/New_York">Eastern</option>
+      <option value="America/Chicago">Central</option>
+      <option value="America/Denver">Mountain</option>
+      <option value="America/Los_Angeles">Pacific</option>
+      <option value="Europe/London">UK</option>
+      <option value="Europe/Paris">Central Europe</option>
+    </select>
+    <div class="person-pill" id="person-pill" role="button" tabindex="0" aria-haspopup="dialog" onclick="openModal()">
+      <span class="person-pill-icon">👤</span>
+      <span id="person-pill-label">Who are you?</span>
+      <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()">✕</span>
+    </div>
+  </div>
+</div>
+
+<div class="tab-bar" role="tablist">
+  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('rankings',this)">🏆 Rankings</button>
+  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('schedule',this)">📅 Schedule</button>
+  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('groups',this)">🗂 Groups</button>
+</div>
+
+<div id="tab-rankings" class="tab-content active" role="tabpanel">
+  <p class="rankings-note">Combined outright tournament-winner probability per participant (blended pre-tournament sportsbook odds, FanDuel / Fox / NBC / CBS). Bookmaker margin not removed — used for relative ranking only.</p>
+  <div id="rankings-list"></div>
+</div>
+
+<div id="tab-schedule" class="tab-content" role="tabpanel">
+  <div class="highlight-note" id="civil-note"></div>
+  <div class="schedule-filters">
+    <label for="filter-mode">Filter:</label>
+    <select class="filter-select" id="filter-mode" onchange="applyFilters()">
+      <option value="all">All Matches</option>
+      <option value="pool">Pool Battles (both teams owned)</option>
+      <option value="mymatches">My Matches</option>
+      <option value="civilwar">Civil Wars Only</option>
+    </select>
+    <label for="filter-group">Group:</label>
+    <select class="filter-select" id="filter-group" onchange="applyFilters()">
+      <option value="all">All Groups</option>
+      <option value="A">Group A</option><option value="B">Group B</option>
+      <option value="C">Group C</option><option value="D">Group D</option>
+      <option value="E">Group E</option><option value="F">Group F</option>
+      <option value="G">Group G</option><option value="H">Group H</option>
+      <option value="I">Group I</option><option value="J">Group J</option>
+      <option value="K">Group K</option><option value="L">Group L</option>
+    </select>
+  </div>
+  <div class="my-filter-note" id="my-filter-note">👆 Select your name above to use "My Matches" filter.</div>
+  <p class="sched-note">Match times are shown in your selected time zone (top-right) — change it any time. Group K &amp; L matchday pairings and all matchday 3 times/venues marked <em>~est.</em> are estimated from the confirmed tournament pattern.</p>
+  <div class="live-status" id="live-status"></div>
+  <div id="schedule-list"></div>
+  <div class="no-results" id="no-results">No matches match the current filters.</div>
+</div>
+
+<div id="tab-groups" class="tab-content" role="tabpanel">
+  <p class="rankings-note" style="margin-bottom:16px">Who owns which team in each group. Teams with no pool owner shown in grey. Win % = outright tournament probability.</p>
+  <div id="groups-grid" class="groups-grid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" style="display:none" role="dialog" aria-modal="true" aria-label="Select your name" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">Who are you?</div>
+    <div class="modal-sub">Pick your name to highlight your teams and matches across all tabs. Your choice is remembered in this browser.</div>
+    <div class="person-grid" id="person-grid"></div>
+    <button class="modal-clear" onclick="clearSelection()">✕ Clear — view all</button>
+  </div>
+</div>
+
+<script>
+// ─── CANONICAL DATA (Phase A — keyed by FIFA team IDs) ──────────────────────────
+// Single inline source of truth. Mirrored to data/teams.json + data/pool.json
+// (kept honest by scripts/check-data.js). Phase B switches the page to fetch those.
+//
+// Team ID → { name (display), group, prob (outright tournament-winner %) }.
+// Joining on stable IDs removes the name-string fragility (no more alias map).
+const TEAMS = {
+  MEX:{name:"Mexico",group:"A",prob:1.4},   RSA:{name:"South Africa",group:"A",prob:0.08},
+  KOR:{name:"South Korea",group:"A",prob:0.20}, CZE:{name:"Czechia",group:"A",prob:0.35},
+  CAN:{name:"Canada",group:"B",prob:0.45},  BIH:{name:"Bosnia & Herz.",group:"B",prob:0.18},
+  QAT:{name:"Qatar",group:"B",prob:0.05},   SUI:{name:"Switzerland",group:"B",prob:1.3},
+  BRA:{name:"Brazil",group:"C",prob:9.5},   MAR:{name:"Morocco",group:"C",prob:1.8},
+  HAI:{name:"Haiti",group:"C",prob:0.03},   SCO:{name:"Scotland",group:"C",prob:0.40},
+  USA:{name:"USA",group:"D",prob:1.5},      PAR:{name:"Paraguay",group:"D",prob:0.12},
+  AUS:{name:"Australia",group:"D",prob:0.12}, TUR:{name:"Türkiye",group:"D",prob:1.0},
+  GER:{name:"Germany",group:"E",prob:6.5},  CUW:{name:"Curaçao",group:"E",prob:0.03},
+  CIV:{name:"Ivory Coast",group:"E",prob:0.45}, ECU:{name:"Ecuador",group:"E",prob:1.0},
+  NED:{name:"Netherlands",group:"F",prob:5.0}, SWE:{name:"Sweden",group:"F",prob:0.60},
+  TUN:{name:"Tunisia",group:"F",prob:0.15}, JPN:{name:"Japan",group:"F",prob:2.0},
+  BEL:{name:"Belgium",group:"G",prob:3.2},  IRN:{name:"Iran",group:"G",prob:0.12},
+  EGY:{name:"Egypt",group:"G",prob:0.22},   NZL:{name:"New Zealand",group:"G",prob:0.05},
+  ESP:{name:"Spain",group:"H",prob:15.0},   KSA:{name:"Saudi Arabia",group:"H",prob:0.07},
+  URU:{name:"Uruguay",group:"H",prob:1.4},  CPV:{name:"Cabo Verde",group:"H",prob:0.07},
+  FRA:{name:"France",group:"I",prob:14.5},  IRQ:{name:"Iraq",group:"I",prob:0.05},
+  NOR:{name:"Norway",group:"I",prob:3.2},   SEN:{name:"Senegal",group:"I",prob:0.85},
+  ALG:{name:"Algeria",group:"J",prob:0.22}, AUT:{name:"Austria",group:"J",prob:0.70},
+  JOR:{name:"Jordan",group:"J",prob:0.03},  ARG:{name:"Argentina",group:"J",prob:8.0},
+  POR:{name:"Portugal",group:"K",prob:10.0}, COL:{name:"Colombia",group:"K",prob:2.5},
+  COD:{name:"DR Congo",group:"K",prob:0.08}, UZB:{name:"Uzbekistan",group:"K",prob:0.05},
+  ENG:{name:"England",group:"L",prob:11.5}, GHA:{name:"Ghana",group:"L",prob:0.25},
+  CRO:{name:"Croatia",group:"L",prob:0.12}, PAN:{name:"Panama",group:"L",prob:0.07},
+};
+
+// Participants → their two team IDs.
+const POOL = [
+  {id:"matt",     name:"Matt",     color:"#f87171",bg:"rgba(248,113,113,.15)", teams:["SEN","QAT"]},
+  {id:"jack",     name:"Jack",     color:"#fb923c",bg:"rgba(251,146,60,.15)",  teams:["MAR","IRQ"]},
+  {id:"anthony",  name:"Anthony",  color:"#facc15",bg:"rgba(250,204,21,.15)",  teams:["AUT","TUN"]},
+  {id:"ben",      name:"Ben",      color:"#4ade80",bg:"rgba(74,222,128,.15)",  teams:["ECU","CZE"]},
+  {id:"atticus",  name:"Atticus",  color:"#22d3ee",bg:"rgba(34,211,238,.15)",  teams:["ARG","KSA"]},
+  {id:"rob",      name:"Rob",      color:"#c084fc",bg:"rgba(192,132,252,.15)", teams:["EGY","NZL"]},
+  {id:"seb",      name:"Seb",      color:"#60a5fa",bg:"rgba(96,165,250,.15)",  teams:["NOR","CIV"]},
+  {id:"rui",      name:"Rui",      color:"#34d399",bg:"rgba(52,211,153,.15)",  teams:["USA","CAN"]},
+  {id:"saul",     name:"Saul",     color:"#fb7185",bg:"rgba(251,113,133,.15)", teams:["JPN","GHA"]},
+  {id:"neil",     name:"Neil",     color:"#a78bfa",bg:"rgba(167,139,250,.15)", teams:["BEL","CPV"]},
+  {id:"sam",      name:"Sam",      color:"#2dd4bf",bg:"rgba(45,212,191,.15)",  teams:["TUR","ALG"]},
+  {id:"kevin",    name:"Kevin",    color:"#fbbf24",bg:"rgba(251,191,36,.15)",  teams:["ESP","CUW"]},
+  {id:"matteo",   name:"Matteo",   color:"#f472b6",bg:"rgba(244,114,182,.15)", teams:["BRA","BIH"]},
+  {id:"pete",     name:"Pete",     color:"#818cf8",bg:"rgba(129,140,248,.15)", teams:["COL","PAN"]},
+  {id:"brian",    name:"Brian",    color:"#a3e635",bg:"rgba(163,230,53,.15)",  teams:["URU","RSA"]},
+  {id:"keith",    name:"Keith",    color:"#f43f5e",bg:"rgba(244,63,94,.15)",   teams:["GER","COD"]},
+  {id:"eric",     name:"Eric",     color:"#38bdf8",bg:"rgba(56,189,248,.15)",  teams:["MEX","IRN"]},
+  {id:"carlos",   name:"Carlos",   color:"#e879f9",bg:"rgba(232,121,249,.15)", teams:["POR","UZB"]},
+  {id:"thomas",   name:"Thomas",   color:"#94a3b8",bg:"rgba(148,163,184,.15)", teams:["SUI","AUS"]},
+  {id:"peter",    name:"Péter",    color:"#ff9500",bg:"rgba(255,149,0,.15)",   teams:["FRA","SWE"]},
+  {id:"thomas-l", name:"Thomas L", color:"#6ee7b7",bg:"rgba(110,231,183,.15)", teams:["ENG","HAI"]},
+  {id:"paul",     name:"Paul",     color:"#a5b4fc",bg:"rgba(165,180,252,.15)", teams:["NED","SCO"]},
+  {id:"tom",      name:"Tom",      color:"#fda4af",bg:"rgba(253,164,175,.15)", teams:["KOR","JOR"]},
+  {id:"pete-n",   name:"Pete N",   color:"#cd7f32",bg:"rgba(205,127,50,.15)",  teams:["CRO","PAR"]},
+];
+
+const GC = {A:"#ef4444",B:"#f97316",C:"#eab308",D:"#22c55e",E:"#06b6d4",F:"#8b5cf6",G:"#ec4899",H:"#f43f5e",I:"#6366f1",J:"#14b8a6",K:"#a855f7",L:"#84cc16"};
+
+// ── Derived lookups (built from the canonical data above; no manual aliases) ──
+const PMAP={}; POOL.forEach(p=>PMAP[p.name]=p);                       // display name → participant
+const OWNER={}; POOL.forEach(p=>p.teams.forEach(t=>OWNER[t]=p.name)); // team ID → owner name
+
+// Civil wars derived: a participant whose two teams share a group will eliminate one of their own.
+const CIVIL_TEAMS=new Set(), CIVIL_PAIRS=[];
+POOL.forEach(p=>{ const [a,b]=p.teams;
+  if(TEAMS[a]&&TEAMS[b]&&TEAMS[a].group===TEAMS[b].group){
+    CIVIL_TEAMS.add(a); CIVIL_TEAMS.add(b);
+    CIVIL_PAIRS.push({owner:p.name,a,b,group:TEAMS[a].group});
+  }
+});
+
+// Group ID → array of team IDs (derived from TEAMS, in A–L order).
+const GROUPS={}; Object.keys(GC).forEach(g=>GROUPS[g]=[]);
+Object.keys(TEAMS).forEach(id=>{ (GROUPS[TEAMS[id].group]=GROUPS[TEAMS[id].group]||[]).push(id); });
+
+function teamName(id){return TEAMS[id]?TEAMS[id].name:id}
+function own(id){return OWNER[id]||null}
+function col(id){const o=own(id);return o?PMAP[o].color:null}
+function bg(id){const o=own(id);return o?PMAP[o].bg:null}
+function prob(id){return TEAMS[id]?TEAMS[id].prob:0}
+
+// Escape a string for safe interpolation into HTML text / attributes.
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+// ─── TIME ZONES ───────────────────────────────────────────────────────────────
+// Stored kickoff times are US Eastern. June 2026 is on EDT (UTC-4), so the absolute
+// instant of a match is its ET clock time + 4 hours. We build a real UTC Date per
+// match and let Intl.DateTimeFormat render it in whatever zone the viewer picks —
+// which also shifts the calendar date correctly across zones.
+const MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+const SEASON_YEAR=2026;
+const ET_UTC_OFFSET=4; // hours to add to ET to reach UTC during EDT (the whole group stage)
+
+// Returns a Date (absolute instant) for a match, or null when the time is unknown (~est.).
+function matchInstant(m){
+  if(m.time==="~est.") return null;
+  const parts=m.date.split(" ");
+  const mon=MONTHS[parts[0]], day=parseInt(parts[1],10);
+  let h,min;
+  if(m.time==="Midnight"){ h=0; min=0; }
+  else{
+    const mt=/^(\d{1,2}):(\d{2})\s*(AM|PM)$/.exec(m.time);
+    if(!mt) return null;
+    h=parseInt(mt[1],10)%12; if(mt[3]==="PM") h+=12; min=parseInt(mt[2],10);
+  }
+  return new Date(Date.UTC(SEASON_YEAR, mon, day, h+ET_UTC_OFFSET, min));
+}
+
+// Valid picker values (besides "auto"); guards against stale/garbage localStorage.
+const TZ_IDS=["America/New_York","America/Chicago","America/Denver","America/Los_Angeles","Europe/London","Europe/Paris"];
+let TZ_SEL="auto";
+
+function deviceZone(){
+  try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }
+  catch(e){ return "America/New_York"; }
+}
+function effectiveZone(){ return TZ_SEL==="auto" ? deviceZone() : TZ_SEL; }
+
+// ─── MATCHES ──────────────────────────────────────────────────────────────────
+// home/away are team IDs. The `civil` flag is derived at render time (own(home)===own(away)).
+const MATCHES=[
+{id:1, g:"A",md:1,date:"Jun 11",s:11,time:"3:00 PM",    home:"MEX",away:"RSA", venue:"Estadio Azteca, Mexico City"},
+{id:2, g:"A",md:1,date:"Jun 11",s:11,time:"10:00 PM",   home:"KOR",away:"CZE", venue:"Estadio Akron, Guadalajara"},
+{id:3, g:"A",md:2,date:"Jun 18",s:18,time:"12:00 PM",   home:"CZE",away:"RSA", venue:"Mercedes-Benz Stadium, Atlanta"},
+{id:4, g:"A",md:2,date:"Jun 18",s:18,time:"9:00 PM",    home:"MEX",away:"KOR", venue:"Estadio Akron, Guadalajara"},
+{id:5, g:"A",md:3,date:"Jun 24",s:24,time:"9:00 PM",    home:"CZE",away:"MEX", venue:"Estadio Azteca, Mexico City",    sim:true},
+{id:6, g:"A",md:3,date:"Jun 24",s:24,time:"9:00 PM",    home:"RSA",away:"KOR", venue:"Estadio BBVA, Monterrey",        sim:true},
+{id:7, g:"B",md:1,date:"Jun 12",s:12,time:"3:00 PM",    home:"CAN",away:"BIH", venue:"BMO Field, Toronto"},
+{id:8, g:"B",md:1,date:"Jun 13",s:13,time:"3:00 PM",    home:"QAT",away:"SUI", venue:"Levi's Stadium, Santa Clara"},
+{id:9, g:"B",md:2,date:"Jun 18",s:18,time:"3:00 PM",    home:"SUI",away:"BIH", venue:"SoFi Stadium, Los Angeles"},
+{id:10,g:"B",md:2,date:"Jun 18",s:18,time:"6:00 PM",    home:"CAN",away:"QAT", venue:"BC Place, Vancouver"},
+{id:11,g:"B",md:3,date:"Jun 24",s:24,time:"3:00 PM",    home:"SUI",away:"CAN", venue:"BC Place, Vancouver",            sim:true},
+{id:12,g:"B",md:3,date:"Jun 24",s:24,time:"3:00 PM",    home:"BIH",away:"QAT", venue:"Lumen Field, Seattle",           sim:true},
+{id:13,g:"C",md:1,date:"Jun 13",s:13,time:"6:00 PM",    home:"BRA",away:"MAR", venue:"MetLife Stadium, New Jersey"},
+{id:14,g:"C",md:1,date:"Jun 13",s:13,time:"9:00 PM",    home:"HAI",away:"SCO", venue:"Gillette Stadium, Foxboro"},
+{id:15,g:"C",md:2,date:"Jun 19",s:19,time:"6:00 PM",    home:"SCO",away:"MAR", venue:"Gillette Stadium, Foxboro"},
+{id:16,g:"C",md:2,date:"Jun 19",s:19,time:"8:30 PM",    home:"BRA",away:"HAI", venue:"Lincoln Financial Field, Philadelphia"},
+{id:17,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"SCO",away:"BRA", venue:"Hard Rock Stadium, Miami",       sim:true},
+{id:18,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"MAR",away:"HAI", venue:"Mercedes-Benz Stadium, Atlanta", sim:true},
+{id:19,g:"D",md:1,date:"Jun 12",s:12,time:"9:00 PM",    home:"USA",away:"PAR", venue:"SoFi Stadium, Los Angeles"},
+{id:20,g:"D",md:1,date:"Jun 13",s:13,time:"Midnight",   home:"AUS",away:"TUR", venue:"BC Place, Vancouver"},
+{id:21,g:"D",md:2,date:"Jun 19",s:19,time:"3:00 PM",    home:"USA",away:"AUS", venue:"Lumen Field, Seattle"},
+{id:22,g:"D",md:2,date:"Jun 19",s:19,time:"11:00 PM",   home:"TUR",away:"PAR", venue:"Levi's Stadium, Santa Clara"},
+{id:23,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"TUR",away:"USA", venue:"SoFi Stadium, Los Angeles",      sim:true},
+{id:24,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"PAR",away:"AUS", venue:"Levi's Stadium, Santa Clara",    sim:true},
+{id:25,g:"E",md:1,date:"Jun 14",s:14,time:"1:00 PM",    home:"GER",away:"CUW", venue:"NRG Stadium, Houston"},
+{id:26,g:"E",md:1,date:"Jun 14",s:14,time:"7:00 PM",    home:"CIV",away:"ECU", venue:"Lincoln Financial Field, Philadelphia"},
+{id:27,g:"E",md:2,date:"Jun 20",s:20,time:"4:00 PM",    home:"GER",away:"CIV", venue:"BMO Field, Toronto"},
+{id:28,g:"E",md:2,date:"Jun 20",s:20,time:"8:00 PM",    home:"ECU",away:"CUW", venue:"Arrowhead Stadium, Kansas City"},
+{id:29,g:"E",md:3,date:"Jun 25",s:25,time:"4:00 PM",    home:"CUW",away:"CIV", venue:"Lincoln Financial Field, Philadelphia", sim:true},
+{id:30,g:"E",md:3,date:"Jun 25",s:25,time:"4:00 PM",    home:"ECU",away:"GER", venue:"MetLife Stadium, New Jersey",    sim:true},
+{id:31,g:"F",md:1,date:"Jun 14",s:14,time:"4:00 PM",    home:"NED",away:"JPN", venue:"AT&T Stadium, Arlington"},
+{id:32,g:"F",md:1,date:"Jun 14",s:14,time:"10:00 PM",   home:"SWE",away:"TUN", venue:"Estadio Akron, Guadalajara"},
+{id:33,g:"F",md:2,date:"Jun 20",s:20,time:"1:00 PM",    home:"NED",away:"SWE", venue:"NRG Stadium, Houston"},
+{id:34,g:"F",md:2,date:"Jun 20",s:20,time:"Midnight",   home:"TUN",away:"JPN", venue:"Estadio Akron, Guadalajara"},
+{id:35,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"NED",away:"TUN", venue:"TBD",                           sim:true,est:true},
+{id:36,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"SWE",away:"JPN", venue:"TBD",                           sim:true,est:true},
+{id:37,g:"G",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"BEL",away:"EGY", venue:"Lumen Field, Seattle"},
+{id:38,g:"G",md:1,date:"Jun 15",s:15,time:"Midnight",   home:"IRN",away:"NZL", venue:"SoFi Stadium, Los Angeles"},
+{id:39,g:"G",md:2,date:"Jun 21",s:21,time:"3:00 PM",    home:"BEL",away:"IRN", venue:"SoFi Stadium, Los Angeles"},
+{id:40,g:"G",md:2,date:"Jun 21",s:21,time:"9:00 PM",    home:"NZL",away:"EGY", venue:"BC Place, Vancouver"},
+{id:41,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"BEL",away:"NZL", venue:"TBD",                           sim:true,est:true},
+{id:42,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"EGY",away:"IRN", venue:"TBD",                           sim:true,est:true},
+{id:43,g:"H",md:1,date:"Jun 15",s:15,time:"1:00 PM",    home:"ESP",away:"CPV", venue:"Mercedes-Benz Stadium, Atlanta"},
+{id:44,g:"H",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"KSA",away:"URU", venue:"Hard Rock Stadium, Miami"},
+{id:45,g:"H",md:2,date:"Jun 21",s:21,time:"12:00 PM",   home:"ESP",away:"KSA", venue:"Mercedes-Benz Stadium, Atlanta"},
+{id:46,g:"H",md:2,date:"Jun 21",s:21,time:"6:00 PM",    home:"URU",away:"CPV", venue:"Hard Rock Stadium, Miami"},
+{id:47,g:"H",md:3,date:"Jun 26",s:26,time:"~est.",      home:"ESP",away:"URU", venue:"TBD",                           sim:true,est:true},
+{id:48,g:"H",md:3,date:"Jun 26",s:26,time:"~est.",      home:"KSA",away:"CPV", venue:"TBD",                           sim:true,est:true},
+{id:49,g:"I",md:1,date:"Jun 16",s:16,time:"3:00 PM",    home:"FRA",away:"SEN", venue:"MetLife Stadium, New Jersey"},
+{id:50,g:"I",md:1,date:"Jun 16",s:16,time:"6:00 PM",    home:"IRQ",away:"NOR", venue:"Gillette Stadium, Foxboro"},
+{id:51,g:"I",md:2,date:"Jun 22",s:22,time:"5:00 PM",    home:"FRA",away:"IRQ", venue:"Lincoln Financial Field, Philadelphia"},
+{id:52,g:"I",md:2,date:"Jun 22",s:22,time:"8:00 PM",    home:"NOR",away:"SEN", venue:"MetLife Stadium, New Jersey"},
+{id:53,g:"I",md:3,date:"Jun 26",s:26,time:"~est.",      home:"FRA",away:"NOR", venue:"TBD",                           sim:true,est:true},
+{id:54,g:"I",md:3,date:"Jun 26",s:26,time:"~est.",      home:"SEN",away:"IRQ", venue:"TBD",                           sim:true,est:true},
+{id:55,g:"J",md:1,date:"Jun 16",s:16,time:"9:00 PM",    home:"ARG",away:"ALG", venue:"Arrowhead Stadium, Kansas City"},
+{id:56,g:"J",md:1,date:"Jun 16",s:16,time:"9:00 PM",    home:"AUT",away:"JOR", venue:"Levi's Stadium, Santa Clara"},
+{id:57,g:"J",md:2,date:"Jun 22",s:22,time:"1:00 PM",    home:"ARG",away:"AUT", venue:"AT&T Stadium, Arlington"},
+{id:58,g:"J",md:2,date:"Jun 22",s:22,time:"11:00 PM",   home:"JOR",away:"ALG", venue:"Levi's Stadium, Santa Clara"},
+{id:59,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ARG",away:"JOR", venue:"TBD",                           sim:true,est:true},
+{id:60,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ALG",away:"AUT", venue:"TBD",                           sim:true,est:true},
+{id:61,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"POR",away:"COL", venue:"TBD",                           est:true},
+{id:62,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"COD",away:"UZB", venue:"TBD",                           est:true},
+{id:63,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"POR",away:"COD", venue:"TBD",                           est:true},
+{id:64,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"UZB",away:"COL", venue:"TBD",                           est:true},
+{id:65,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"COL",away:"COD", venue:"TBD",                           sim:true,est:true},
+{id:66,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"UZB",away:"POR", venue:"TBD",                           sim:true,est:true},
+{id:67,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"ENG",away:"CRO", venue:"TBD",                           est:true},
+{id:68,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"GHA",away:"PAN", venue:"TBD",                           est:true},
+{id:69,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"ENG",away:"GHA", venue:"TBD",                           est:true},
+{id:70,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"PAN",away:"CRO", venue:"TBD",                           est:true},
+{id:71,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ENG",away:"PAN", venue:"TBD",                           sim:true,est:true},
+{id:72,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"CRO",away:"GHA", venue:"TBD",                           sim:true,est:true},
+];
+
+// ─── LIVE DATA (optional overlay) ───────────────────────────────────────────────
+// data/matches.json is produced by the refresh pipeline (GitHub Actions). It is keyed
+// by resolved team IDs, so the join is robust. When absent (e.g. before the pipeline
+// runs, or offline), the dashboard renders exactly as the static schedule — no errors.
+let LIVE = null; // { byKey:{key:match}, fetched_at, source } or null
+
+// Order-independent key so a home/away orientation difference between sources still joins.
+function matchKey(a,b,group){ return group+":"+[a,b].sort().join("-"); }
+
+async function loadLive(){
+  try{
+    const res = await fetch("data/matches.json", {cache:"no-store"});
+    if(!res.ok) return false;
+    const data = await res.json();
+    const byKey = {};
+    (data.matches||[]).forEach(m=>{ byKey[matchKey(m.home_id,m.away_id,m.group)] = m; });
+    LIVE = {byKey, fetched_at:data.fetched_at, source:data.source};
+    buildSchedule();
+    applyPersonSelection(SELECTED, false); // re-apply highlight/filters on fresh cards
+    updateFreshness();
+    return true;
+  }catch(e){ return false; }
+}
+
+function timeAgo(iso){
+  const ms = Date.now() - Date.parse(iso);
+  if(!isFinite(ms)) return "";
+  const m = Math.round(ms/60000);
+  if(m < 1) return "just now";
+  if(m < 60) return m+" min ago";
+  const h = Math.round(m/60);
+  return h+" hr"+(h>1?"s":"")+" ago";
+}
+
+function updateFreshness(){
+  const el = document.getElementById("live-status");
+  if(!el) return;
+  if(!LIVE || !LIVE.fetched_at){ el.innerHTML=""; return; }
+  const ageMin = (Date.now() - Date.parse(LIVE.fetched_at))/60000;
+  const liveNow = Object.values(LIVE.byKey).some(m=>m.status==="live");
+  const stale = ageMin > 10;
+  const cls = "live-pill" + (liveNow ? " livenow" : "") + (stale ? " stale" : "");
+  const label = liveNow
+    ? (stale ? "Live — scores may be delayed" : "Live now")
+    : "Scores updated "+timeAgo(LIVE.fetched_at);
+  el.innerHTML = `<span class="${cls}"><span class="live-dot"></span>${esc(label)}</span>`;
+}
+
+// ─── SELECTION ────────────────────────────────────────────────────────────────
+let SELECTED = null;
+
+function applyPersonSelection(name, save=true){
+  SELECTED = name;
+  const root = document.documentElement;
+  const pill = document.getElementById("person-pill");
+  const label = document.getElementById("person-pill-label");
+  const clearBtn = document.getElementById("person-pill-clear");
+
+  if(name && PMAP[name]){
+    root.style.setProperty("--sel-color", PMAP[name].color);
+    root.style.setProperty("--sel-bg", PMAP[name].bg);
+    label.textContent = name;
+    pill.classList.add("chosen");
+    clearBtn.style.display = "inline";
+    if(save) try{localStorage.setItem("wc-pool-person",name)}catch(e){}
+  } else {
+    root.style.setProperty("--sel-color","transparent");
+    root.style.setProperty("--sel-bg","transparent");
+    label.textContent = "Who are you?";
+    pill.classList.remove("chosen");
+    clearBtn.style.display = "none";
+    if(save) try{localStorage.removeItem("wc-pool-person")}catch(e){}
+  }
+
+  // Rankings
+  document.querySelectorAll(".rank-row").forEach(row=>{
+    row.classList.toggle("selected-me", row.dataset.person===name);
+  });
+
+  // Schedule cards
+  document.querySelectorAll(".match-card").forEach(card=>{
+    const isMe = name && (card.dataset.ho===name||card.dataset.ao===name);
+    card.classList.toggle("my-match", !!isMe);
+    // refresh owner tags — re-render them
+    card.querySelectorAll(".owner-tag[data-team]").forEach(tag=>{
+      const t = tag.dataset.team;
+      tag.classList.toggle("me", own(t)===name);
+    });
+  });
+
+  // Groups
+  document.querySelectorAll(".group-team-row").forEach(row=>{
+    row.classList.toggle("my-team", row.dataset.owner===name);
+  });
+
+  // Modal buttons
+  document.querySelectorAll(".person-option").forEach(btn=>{
+    btn.classList.toggle("active-choice", btn.dataset.name===name);
+  });
+
+  applyFilters();
+  closeModal();
+}
+
+function clearSelection(){ applyPersonSelection(null); }
+
+function openModal(){ document.getElementById("modal").style.display="flex"; }
+function closeModal(){ document.getElementById("modal").style.display="none"; }
+
+// ─── RANKINGS ─────────────────────────────────────────────────────────────────
+function buildRankings(){
+  const ranked = POOL.map(p=>{
+    const p1=prob(p.teams[0]), p2=prob(p.teams[1]);
+    return {name:p.name,color:p.color,t1:p.teams[0],t2:p.teams[1],p1,p2,total:p1+p2};
+  }).sort((a,b)=>b.total-a.total);
+  const max=ranked[0].total;
+
+  function tier(t){
+    if(t>=14) return {label:"Elite",     bg:"rgba(34,197,94,.15)",  col:"#4ade80"};
+    if(t>=7)  return {label:"Strong",    bg:"rgba(132,204,22,.15)", col:"#a3e635"};
+    if(t>=2.5)return {label:"Competitive",bg:"rgba(234,179,8,.12)",col:"#facc15"};
+    if(t>=0.8)return {label:"Underdog",  bg:"rgba(249,115,22,.12)", col:"#fb923c"};
+    return           {label:"Long Shot", bg:"rgba(239,68,68,.12)",  col:"#f87171"};
+  }
+
+  document.getElementById("rankings-list").innerHTML = ranked.map((r,i)=>{
+    const t=tier(r.total), topCls=i<3?"top":"";
+    return `<div class="rank-row" data-person="${esc(r.name)}" title="${esc(teamName(r.t1))}: ${r.p1.toFixed(2)}% | ${esc(teamName(r.t2))}: ${r.p2.toFixed(2)}%">
+      <div class="rank-num ${topCls}">#${i+1}</div>
+      <div class="rank-dot" style="background:${r.color}"></div>
+      <div class="rank-name" style="color:${r.color}">${esc(r.name)}</div>
+      <div class="rank-teams">${esc(teamName(r.t1))} <span style="color:#1e3a5f">+</span> ${esc(teamName(r.t2))}</div>
+      <div class="tier-badge" style="background:${t.bg};color:${t.col}">${t.label}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.total/max*100).toFixed(1)}%;background:${r.color}"></div></div>
+      <div class="rank-pct" style="color:${r.color}">${r.total.toFixed(1)}%</div>
+    </div>`;
+  }).join("");
+}
+
+// ─── SCHEDULE ─────────────────────────────────────────────────────────────────
+function ownerTag(id){
+  const o=own(id);
+  if(!o) return `<span class="owner-tag none" data-team="${id}">—</span>`;
+  return `<span class="owner-tag" data-team="${id}" style="background:${bg(id)};color:${col(id)}">${esc(o)}</span>`;
+}
+
+function buildSchedule(){
+  const zone=effectiveZone();
+  const keyFmt =new Intl.DateTimeFormat("en-CA",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit"}); // YYYY-MM-DD sort key
+  const dayFmt =new Intl.DateTimeFormat("en-US",{timeZone:zone,weekday:"short",month:"short",day:"numeric"});  // header label
+  const timeFmt=new Intl.DateTimeFormat("en-US",{timeZone:zone,hour:"numeric",minute:"2-digit",timeZoneName:"short"});
+
+  // Build a display row per match, localized to the selected zone.
+  const rows=MATCHES.map(m=>{
+    const dt=matchInstant(m);
+    if(dt){
+      return {m,dt,dateKey:keyFmt.format(dt),dateLabel:dayFmt.format(dt),timeLabel:timeFmt.format(dt),sortT:dt.getTime()};
+    }
+    // Unknown time (~est.): keep its ET calendar day and sort after timed games.
+    return {m,dt:null,dateKey:`${SEASON_YEAR}-06-${String(m.s).padStart(2,"0")}`,dateLabel:m.date,timeLabel:"~est.",sortT:Number.MAX_SAFE_INTEGER};
+  });
+
+  // Group by local date, order days chronologically, order matches within a day by instant.
+  const groups={};
+  rows.forEach(r=>{ (groups[r.dateKey]=groups[r.dateKey]||{label:r.dateLabel,items:[]}).items.push(r); });
+
+  let html="";
+  Object.keys(groups).sort().forEach(key=>{
+    const g=groups[key];
+    g.items.sort((a,b)=> a.sortT-b.sortT || a.m.id-b.m.id);
+    html+=`<div class="date-group"><div class="date-label">${esc(g.label)}</div>`;
+    g.items.forEach(({m,timeLabel})=>{
+      const ho=own(m.home)||"", ao=own(m.away)||"";
+      const isCivil = !!ho && ho===ao;   // both teams owned by the same participant
+
+      // Live overlay (if data/matches.json loaded). Scores re-oriented to our home/away.
+      const lv = LIVE && LIVE.byKey[matchKey(m.home,m.away,m.g)];
+      let center=`vs`, statusHtml="";
+      if(lv && lv.status && lv.status!=="scheduled" && lv.home_score!=null && lv.away_score!=null){
+        let hs=lv.home_score, as=lv.away_score;
+        if(lv.home_id && lv.home_id!==m.home){ const t=hs; hs=as; as=t; }
+        center=`<span class="score">${hs}–${as}</span>`;
+        if(lv.status==="live") statusHtml=`<div class="mstatus live">● LIVE${lv.minute?" "+esc(String(lv.minute))+"'":""}</div>`;
+        else if(lv.status==="completed") statusHtml=`<div class="mstatus ft">FULL TIME</div>`;
+      }
+
+      let cls="match-card";
+      if(isCivil) cls+=" civil-war";
+      html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
+        <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${m.g}</div>
+        <div class="team-side">
+          ${ownerTag(m.home)}
+          <div class="team-name">${esc(teamName(m.home))}</div>
+        </div>
+        <div class="vs-col">${center}${isCivil?`<span class="civil-icon">⚡</span>`:""}
+        </div>
+        <div class="team-side right">
+          ${ownerTag(m.away)}
+          <div class="team-name">${esc(teamName(m.away))}</div>
+        </div>
+        <div class="match-meta">
+          ${statusHtml||`<div class="time">${esc(timeLabel)}</div>`}
+          ${m.sim?`<div class="sim-badge">SIMULTANEOUS</div>`:""}
+          ${m.est?`<div class="est-badge">~estimated</div>`:""}
+          <div style="font-size:9px;color:#253550;margin-top:1px">${m.venue!=="TBD"?esc(m.venue.split(",")[0]):""}</div>
+        </div>
+      </div>`;
+    });
+    html+="</div>";
+  });
+  document.getElementById("schedule-list").innerHTML=html;
+}
+
+// Switch the schedule's time zone, persist it, then re-render and re-apply highlighting/filters.
+function setTimezone(sel){
+  TZ_SEL = (sel==="auto"||TZ_IDS.includes(sel)) ? sel : "auto";
+  try{ localStorage.setItem("wc-pool-tz",TZ_SEL); }catch(e){}
+  const picker=document.getElementById("tz-select");
+  if(picker) picker.value=TZ_SEL;
+  buildSchedule();
+  applyPersonSelection(SELECTED,false); // re-highlight my-matches and re-run filters on fresh cards
+}
+
+function applyFilters(){
+  const mode=document.getElementById("filter-mode").value;
+  const grp=document.getElementById("filter-group").value;
+  const note=document.getElementById("my-filter-note");
+
+  note.classList.toggle("visible", mode==="mymatches" && !SELECTED);
+
+  let visibleCount=0;
+  document.querySelectorAll(".match-card").forEach(card=>{
+    const cg=card.dataset.group, ho=card.dataset.ho, ao=card.dataset.ao;
+    const isCivil=card.dataset.civil==="1";
+    const isBattle=ho&&ao&&ho!==ao;
+    const isMy=SELECTED&&(ho===SELECTED||ao===SELECTED);
+
+    let show=true;
+    if(grp!=="all"&&cg!==grp) show=false;
+    if(mode==="pool"&&!isBattle&&!isCivil) show=false;
+    if(mode==="mymatches"&&!isMy) show=false;
+    if(mode==="civilwar"&&!isCivil) show=false;
+    card.classList.toggle("hidden",!show);
+    if(show) visibleCount++;
+  });
+
+  document.querySelectorAll(".date-group").forEach(dg=>{
+    const any=[...dg.querySelectorAll(".match-card")].some(c=>!c.classList.contains("hidden"));
+    dg.style.display=any?"block":"none";
+  });
+
+  document.getElementById("no-results").classList.toggle("visible", visibleCount===0);
+}
+
+// ─── GROUPS ───────────────────────────────────────────────────────────────────
+function buildGroups(){
+  let html="";
+  Object.entries(GROUPS).forEach(([grp,teamIds])=>{
+    html+=`<div class="group-card">
+      <div class="group-card-header" style="color:${GC[grp]}">Group ${grp}</div>`;
+    // Show each group sorted by win probability (strongest first).
+    teamIds.slice().sort((a,b)=>prob(b)-prob(a)).forEach(id=>{
+      const o=own(id), p=prob(id), cw=CIVIL_TEAMS.has(id);
+      html+=`<div class="group-team-row" data-owner="${esc(o||'')}">
+        <div>
+          <span class="group-team-name">${esc(teamName(id))}</span>
+          ${cw?`<span class="civil-marker">⚡</span>`:""}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;color:#253550">${p.toFixed(2)}%</span>
+          ${o?`<span class="owner-tag" style="background:${bg(id)};color:${col(id)}">${esc(o)}</span>`
+             :`<span class="owner-tag none">unclaimed</span>`}
+        </div>
+      </div>`;
+    });
+    html+="</div>";
+  });
+  document.getElementById("groups-grid").innerHTML=html;
+}
+
+// Build the "Civil Wars" explainer from the derived pairs (no hardcoded names).
+function buildCivilNote(){
+  const el=document.getElementById("civil-note");
+  if(!el) return;
+  if(!CIVIL_PAIRS.length){ el.style.display="none"; return; }
+  const parts=CIVIL_PAIRS.map(c=>
+    `<strong>${esc(c.owner)}</strong> owns both <strong>${esc(teamName(c.a))}</strong> and <strong>${esc(teamName(c.b))}</strong> (Group ${c.group}).`);
+  el.innerHTML=`⚔️ <strong>Civil Wars</strong> — ${parts.join(" ")} One of their own teams will knock out the other. Marked <span style="color:#f59e0b">⚡</span>`;
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function buildModal(){
+  document.getElementById("person-grid").innerHTML=
+    POOL.map(p=>
+      `<button class="person-option" data-name="${esc(p.name)}"
+        style="color:${p.color};border-color:${p.color}40;background:${p.bg}"
+        onclick="applyPersonSelection(this.dataset.name)">${esc(p.name)}</button>`
+    ).join("");
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name,btn){
+  document.querySelectorAll(".tab-content").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(el=>{el.classList.remove("active");el.setAttribute("aria-selected","false");});
+  document.getElementById("tab-"+name).classList.add("active");
+  btn.classList.add("active");
+  btn.setAttribute("aria-selected","true");
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+// Restore saved time zone first so the schedule renders in the right zone on load.
+try{
+  const tz=localStorage.getItem("wc-pool-tz");
+  if(tz==="auto"||TZ_IDS.includes(tz)) TZ_SEL=tz;
+}catch(e){}
+document.getElementById("tz-select").value=TZ_SEL;
+
+buildRankings();
+buildCivilNote();
+buildSchedule();
+buildGroups();
+buildModal();
+
+// Keyboard: Enter/Space opens the person picker from the pill, Escape closes the modal.
+document.getElementById("person-pill").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openModal(); }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+// Restore saved selection
+try{
+  const saved=localStorage.getItem("wc-pool-person");
+  if(saved&&PMAP[saved]) applyPersonSelection(saved, false);
+}catch(e){}
+
+// Live scores: load once, then refresh every 60s while the tab is visible.
+// No-ops gracefully if data/matches.json doesn't exist yet.
+loadLive();
+setInterval(()=>{ if(!document.hidden) loadLive(); }, 60000);
+</script>
+</body>
+</html>
