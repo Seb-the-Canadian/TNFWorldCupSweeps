@@ -6,11 +6,11 @@
 <meta name="description" content="2026 World Cup sweepstakes pool dashboard — rankings, schedule, and group ownership for 24 participants.">
 <meta name="theme-color" content="#08101e">
 <meta name="color-scheme" content="dark">
-<meta property="og:title" content="2026 World Cup Pool Dashboard">
+<meta property="og:title" content="TNFifa World Cup 2026 Sweepstakes">
 <meta property="og:description" content="Track our World Cup sweepstakes — rankings, schedule, and groups.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
-<title>2026 WC Pool Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f1c2e'/><text x='50' y='72' font-size='58' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%233b82f6'>T</text></svg>">
+<title>TNFifa World Cup 2026 Sweepstakes</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -160,21 +160,35 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   .rank-bar-wrap,.tier-badge{display:none}
   .match-card{grid-template-columns:22px 1fr auto 1fr 70px}
 }
+
+/* Lucide icons (loaded from CDN; createIcons() swaps <i data-lucide> → <svg class="lucide">) */
+.lucide{width:1em;height:1em;stroke-width:2;display:inline-block;vertical-align:-0.15em}
+.header-logo{display:inline-flex;align-items:center;justify-content:center;color:#7aa4cc}
+.header-logo .lucide{width:26px;height:26px}
+.tab-btn .lucide{width:15px;height:15px;margin-right:6px;vertical-align:-3px}
+.person-pill-icon{display:inline-flex}
+.person-pill-icon .lucide{width:14px;height:14px}
+.person-pill-clear .lucide{width:13px;height:13px;vertical-align:-2px}
+.my-filter-note .lucide{width:13px;height:13px;vertical-align:-2px;margin-right:3px}
+.modal-clear .lucide{width:13px;height:13px;vertical-align:-2px;margin-right:4px}
+.highlight-note .lucide{width:13px;height:13px;vertical-align:-2px;color:#f59e0b}
+.civil-icon .lucide,.civil-marker .lucide{width:11px;height:11px;color:#f59e0b}
+.mstatus.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:4px;vertical-align:1px;animation:livepulse 1.4s infinite}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <div class="header-logo">⚽</div>
+    <div class="header-logo"><i data-lucide="trophy"></i></div>
     <div>
-      <div class="header-title">2026 World Cup Pool</div>
+      <div class="header-title">TNFifa World Cup 2026 Sweepstakes</div>
       <div class="header-sub">24 participants · 48 teams · Group stage: Jun 11 – Jun 27</div>
     </div>
   </div>
   <div class="header-right">
     <select class="tz-select" id="tz-select" aria-label="Time zone" onchange="setTimezone(this.value)" title="Show match times in this time zone">
-      <option value="auto">🌐 Auto (device)</option>
+      <option value="auto">Auto (device)</option>
       <option value="America/New_York">Eastern</option>
       <option value="America/Chicago">Central</option>
       <option value="America/Denver">Mountain</option>
@@ -183,17 +197,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <option value="Europe/Paris">Central Europe</option>
     </select>
     <div class="person-pill" id="person-pill" role="button" tabindex="0" aria-haspopup="dialog" onclick="openModal()">
-      <span class="person-pill-icon">👤</span>
+      <span class="person-pill-icon"><i data-lucide="user"></i></span>
       <span id="person-pill-label">Who are you?</span>
-      <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()">✕</span>
+      <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()"><i data-lucide="x"></i></span>
     </div>
   </div>
 </div>
 
 <div class="tab-bar" role="tablist">
-  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('rankings',this)">🏆 Rankings</button>
-  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('schedule',this)">📅 Schedule</button>
-  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('groups',this)">🗂 Groups</button>
+  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('rankings',this)"><i data-lucide="medal"></i>Rankings</button>
+  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('schedule',this)"><i data-lucide="calendar"></i>Schedule</button>
+  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('groups',this)"><i data-lucide="layout-grid"></i>Groups</button>
 </div>
 
 <div id="tab-rankings" class="tab-content active" role="tabpanel">
@@ -222,7 +236,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <option value="K">Group K</option><option value="L">Group L</option>
     </select>
   </div>
-  <div class="my-filter-note" id="my-filter-note">👆 Select your name above to use "My Matches" filter.</div>
+  <div class="my-filter-note" id="my-filter-note"><i data-lucide="arrow-up"></i>Select your name above to use "My Matches" filter.</div>
   <p class="sched-note">Match times are shown in your selected time zone (top-right) — change it any time. Group K &amp; L matchday pairings and all matchday 3 times/venues marked <em>~est.</em> are estimated from the confirmed tournament pattern.</p>
   <div class="live-status" id="live-status"></div>
   <div id="schedule-list"></div>
@@ -240,9 +254,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="modal-title">Who are you?</div>
     <div class="modal-sub">Pick your name to highlight your teams and matches across all tabs. Your choice is remembered in this browser.</div>
     <div class="person-grid" id="person-grid"></div>
-    <button class="modal-clear" onclick="clearSelection()">✕ Clear — view all</button>
+    <button class="modal-clear" onclick="clearSelection()"><i data-lucide="x"></i>Clear — view all</button>
   </div>
 </div>
+
+<!-- Lucide icons (https://lucide.dev) -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 
 <script>
 // ─── CANONICAL DATA (Phase A — keyed by FIFA team IDs) ──────────────────────────
@@ -333,6 +350,9 @@ function prob(id){return TEAMS[id]?TEAMS[id].prob:0}
 
 // Escape a string for safe interpolation into HTML text / attributes.
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+// Render Lucide icons (swaps <i data-lucide="…"> → <svg>). No-op if the CDN didn't load or off-DOM.
+function drawIcons(){ try{ if(typeof window!=="undefined" && window.lucide) window.lucide.createIcons(); }catch(e){} }
 
 // ─── TIME ZONES ───────────────────────────────────────────────────────────────
 // Stored kickoff times are US Eastern. June 2026 is on EDT (UTC-4), so the absolute
@@ -627,7 +647,7 @@ function buildSchedule(){
         let hs=lv.home_score, as=lv.away_score;
         if(lv.home_id && lv.home_id!==m.home){ const t=hs; hs=as; as=t; }
         center=`<span class="score">${hs}–${as}</span>`;
-        if(lv.status==="live") statusHtml=`<div class="mstatus live">● LIVE${lv.minute?" "+esc(String(lv.minute))+"'":""}</div>`;
+        if(lv.status==="live") statusHtml=`<div class="mstatus live">LIVE${lv.minute?" "+esc(String(lv.minute))+"'":""}</div>`;
         else if(lv.status==="completed") statusHtml=`<div class="mstatus ft">FULL TIME</div>`;
       }
 
@@ -639,7 +659,7 @@ function buildSchedule(){
           ${ownerTag(m.home)}
           <div class="team-name">${esc(teamName(m.home))}</div>
         </div>
-        <div class="vs-col">${center}${isCivil?`<span class="civil-icon">⚡</span>`:""}
+        <div class="vs-col">${center}${isCivil?`<span class="civil-icon"><i data-lucide="zap"></i></span>`:""}
         </div>
         <div class="team-side right">
           ${ownerTag(m.away)}
@@ -656,6 +676,7 @@ function buildSchedule(){
     html+="</div>";
   });
   document.getElementById("schedule-list").innerHTML=html;
+  drawIcons();
 }
 
 // Switch the schedule's time zone, persist it, then re-render and re-apply highlighting/filters.
@@ -711,7 +732,7 @@ function buildGroups(){
       html+=`<div class="group-team-row" data-owner="${esc(o||'')}">
         <div>
           <span class="group-team-name">${esc(teamName(id))}</span>
-          ${cw?`<span class="civil-marker">⚡</span>`:""}
+          ${cw?`<span class="civil-marker"><i data-lucide="zap"></i></span>`:""}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:10px;color:#253550">${p.toFixed(2)}%</span>
@@ -723,6 +744,7 @@ function buildGroups(){
     html+="</div>";
   });
   document.getElementById("groups-grid").innerHTML=html;
+  drawIcons();
 }
 
 // Build the "Civil Wars" explainer from the derived pairs (no hardcoded names).
@@ -732,7 +754,8 @@ function buildCivilNote(){
   if(!CIVIL_PAIRS.length){ el.style.display="none"; return; }
   const parts=CIVIL_PAIRS.map(c=>
     `<strong>${esc(c.owner)}</strong> owns both <strong>${esc(teamName(c.a))}</strong> and <strong>${esc(teamName(c.b))}</strong> (Group ${c.group}).`);
-  el.innerHTML=`⚔️ <strong>Civil Wars</strong> — ${parts.join(" ")} One of their own teams will knock out the other. Marked <span style="color:#f59e0b">⚡</span>`;
+  el.innerHTML=`<i data-lucide="swords"></i> <strong>Civil Wars</strong> — ${parts.join(" ")} One of their own teams will knock out the other. Marked <i data-lucide="zap"></i>`;
+  drawIcons();
 }
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
@@ -767,6 +790,7 @@ buildCivilNote();
 buildSchedule();
 buildGroups();
 buildModal();
+drawIcons(); // convert the static header/tab/pill icons (CDN script loads before this)
 
 // Keyboard: Enter/Space opens the person picker from the pill, Escape closes the modal.
 document.getElementById("person-pill").addEventListener("keydown",e=>{
