@@ -28,9 +28,14 @@ function extractInline() {
   });
   global.document = {
     getElementById: el, querySelectorAll: () => [],
-    documentElement: { style: { setProperty() {} } }, addEventListener() {},
+    documentElement: { style: { setProperty() {} } }, addEventListener() {}, hidden: true,
   };
   global.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+  // The page's init schedules a poll and fetches live data; neutralise both so this
+  // check evaluates the data definitions without keeping Node's event loop alive.
+  global.setInterval = () => 0;
+  global.clearInterval = () => {};
+  global.fetch = async () => ({ ok: false });
   eval(script + ";globalThis.__TEAMS=TEAMS;globalThis.__POOL=POOL;");
   return { TEAMS: globalThis.__TEAMS, POOL: globalThis.__POOL };
 }
@@ -87,3 +92,4 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(`✓ check-data: 48 teams, 24 participants — inline TEAMS/POOL match data/teams.json + data/pool.json`);
+process.exit(0); // the evaluated page script may leave timers/promises pending; exit cleanly

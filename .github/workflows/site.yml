@@ -44,6 +44,7 @@ jobs:
 
       - name: Refresh match data
         if: github.event_name != 'push' && steps.guard.outputs.active == 'true'
+        continue-on-error: true   # a feed/adapter failure must not block deploying the site
         run: node scripts/refresh.js
 
       - name: Commit data if it changed
