@@ -1,0 +1,11 @@
+{
+  "name": "tnf-world-cup-sweeps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "2026 World Cup sweepstakes pool dashboard (static, GitHub Pages).",
+  "scripts": {
+    "check": "node scripts/check-data.js",
+    "test": "node scripts/check-data.js"
+  },
+  "license": "MIT"
+}

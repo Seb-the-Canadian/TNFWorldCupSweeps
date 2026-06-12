@@ -28,8 +28,10 @@ team-identity joins, Pages deploy method, slugs, and change-detection corrected)
 Subsumes several backlog items below (live results & standings, momentum, history chart,
 civil-war countdown, conviction signal). Phased to ship value early and de-risk first:
 
-- [ ] **Phase A — Canonical team identity (no new infra).** Add `data/teams.json` (FIFA-code
-      IDs + per-source aliases); refactor `pool.json` + `index.html` to use IDs. Removes the
+- [x] **Phase A — Canonical team identity (no new infra).** ✅ `data/teams.json` (FIFA-code
+      IDs + per-source aliases) and `data/pool.json` added; `index.html` refactored to an
+      ID-keyed `TEAMS`/`POOL` model (groups, owners, and civil wars now *derived*, not
+      hardcoded). `scripts/check-data.js` (`npm test`) guards inline↔JSON drift. Removes the
       biggest failure mode (three sources disagreeing on team-name strings).
 - [ ] **Phase B — Live scores & standings.** worldcup26.ir adapter → `matches.json` /
       `standings.json`; refresh Action with inline Pages deploy; loading/stale states in the UI.

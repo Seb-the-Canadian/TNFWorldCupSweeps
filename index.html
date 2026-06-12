@@ -190,9 +190,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <div id="tab-schedule" class="tab-content" role="tabpanel">
-  <div class="highlight-note">
-    ⚔️ <strong>Civil Wars</strong> — Rob owns both <strong>Egypt</strong> and <strong>New Zealand</strong> (Group G). Carlos owns both <strong>Portugal</strong> and <strong>Uzbekistan</strong> (Group K). One of their own teams will knock out the other. Marked <span style="color:#f59e0b">⚡</span>
-  </div>
+  <div class="highlight-note" id="civil-note"></div>
   <div class="schedule-filters">
     <label for="filter-mode">Filter:</label>
     <select class="filter-select" id="filter-mode" onchange="applyFilters()">
@@ -234,59 +232,91 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
-// ─── PARTICIPANTS ─────────────────────────────────────────────────────────────
-const P = {
-  "Matt":     {color:"#f87171",bg:"rgba(248,113,113,.15)", teams:["Senegal","Qatar"]},
-  "Jack":     {color:"#fb923c",bg:"rgba(251,146,60,.15)",  teams:["Morocco","Iraq"]},
-  "Anthony":  {color:"#facc15",bg:"rgba(250,204,21,.15)",  teams:["Austria","Tunisia"]},
-  "Ben":      {color:"#4ade80",bg:"rgba(74,222,128,.15)",  teams:["Ecuador","Czechia"]},
-  "Atticus":  {color:"#22d3ee",bg:"rgba(34,211,238,.15)",  teams:["Argentina","Saudi Arabia"]},
-  "Rob":      {color:"#c084fc",bg:"rgba(192,132,252,.15)", teams:["Egypt","New Zealand"]},
-  "Seb":      {color:"#60a5fa",bg:"rgba(96,165,250,.15)",  teams:["Norway","Ivory Coast"]},
-  "Rui":      {color:"#34d399",bg:"rgba(52,211,153,.15)",  teams:["USA","Canada"]},
-  "Saul":     {color:"#fb7185",bg:"rgba(251,113,133,.15)", teams:["Japan","Ghana"]},
-  "Neil":     {color:"#a78bfa",bg:"rgba(167,139,250,.15)", teams:["Belgium","Cabo Verde"]},
-  "Sam":      {color:"#2dd4bf",bg:"rgba(45,212,191,.15)",  teams:["Türkiye","Algeria"]},
-  "Kevin":    {color:"#fbbf24",bg:"rgba(251,191,36,.15)",  teams:["Spain","Curaçao"]},
-  "Matteo":   {color:"#f472b6",bg:"rgba(244,114,182,.15)", teams:["Brazil","Bosnia & Herz."]},
-  "Pete":     {color:"#818cf8",bg:"rgba(129,140,248,.15)", teams:["Colombia","Panama"]},
-  "Brian":    {color:"#a3e635",bg:"rgba(163,230,53,.15)",  teams:["Uruguay","South Africa"]},
-  "Keith":    {color:"#f43f5e",bg:"rgba(244,63,94,.15)",   teams:["Germany","DR Congo"]},
-  "Eric":     {color:"#38bdf8",bg:"rgba(56,189,248,.15)",  teams:["Mexico","Iran"]},
-  "Carlos":   {color:"#e879f9",bg:"rgba(232,121,249,.15)", teams:["Portugal","Uzbekistan"]},
-  "Thomas":   {color:"#94a3b8",bg:"rgba(148,163,184,.15)", teams:["Switzerland","Australia"]},
-  "Péter":    {color:"#ff9500",bg:"rgba(255,149,0,.15)",   teams:["France","Sweden"]},
-  "Thomas L": {color:"#6ee7b7",bg:"rgba(110,231,183,.15)", teams:["England","Haiti"]},
-  "Paul":     {color:"#a5b4fc",bg:"rgba(165,180,252,.15)", teams:["Netherlands","Scotland"]},
-  "Tom":      {color:"#fda4af",bg:"rgba(253,164,175,.15)", teams:["South Korea","Jordan"]},
-  "Pete N":   {color:"#cd7f32",bg:"rgba(205,127,50,.15)",  teams:["Croatia","Paraguay"]},
+// ─── CANONICAL DATA (Phase A — keyed by FIFA team IDs) ──────────────────────────
+// Single inline source of truth. Mirrored to data/teams.json + data/pool.json
+// (kept honest by scripts/check-data.js). Phase B switches the page to fetch those.
+//
+// Team ID → { name (display), group, prob (outright tournament-winner %) }.
+// Joining on stable IDs removes the name-string fragility (no more alias map).
+const TEAMS = {
+  MEX:{name:"Mexico",group:"A",prob:1.4},   RSA:{name:"South Africa",group:"A",prob:0.08},
+  KOR:{name:"South Korea",group:"A",prob:0.20}, CZE:{name:"Czechia",group:"A",prob:0.35},
+  CAN:{name:"Canada",group:"B",prob:0.45},  BIH:{name:"Bosnia & Herz.",group:"B",prob:0.18},
+  QAT:{name:"Qatar",group:"B",prob:0.05},   SUI:{name:"Switzerland",group:"B",prob:1.3},
+  BRA:{name:"Brazil",group:"C",prob:9.5},   MAR:{name:"Morocco",group:"C",prob:1.8},
+  HAI:{name:"Haiti",group:"C",prob:0.03},   SCO:{name:"Scotland",group:"C",prob:0.40},
+  USA:{name:"USA",group:"D",prob:1.5},      PAR:{name:"Paraguay",group:"D",prob:0.12},
+  AUS:{name:"Australia",group:"D",prob:0.12}, TUR:{name:"Türkiye",group:"D",prob:1.0},
+  GER:{name:"Germany",group:"E",prob:6.5},  CUW:{name:"Curaçao",group:"E",prob:0.03},
+  CIV:{name:"Ivory Coast",group:"E",prob:0.45}, ECU:{name:"Ecuador",group:"E",prob:1.0},
+  NED:{name:"Netherlands",group:"F",prob:5.0}, SWE:{name:"Sweden",group:"F",prob:0.60},
+  TUN:{name:"Tunisia",group:"F",prob:0.15}, JPN:{name:"Japan",group:"F",prob:2.0},
+  BEL:{name:"Belgium",group:"G",prob:3.2},  IRN:{name:"Iran",group:"G",prob:0.12},
+  EGY:{name:"Egypt",group:"G",prob:0.22},   NZL:{name:"New Zealand",group:"G",prob:0.05},
+  ESP:{name:"Spain",group:"H",prob:15.0},   KSA:{name:"Saudi Arabia",group:"H",prob:0.07},
+  URU:{name:"Uruguay",group:"H",prob:1.4},  CPV:{name:"Cabo Verde",group:"H",prob:0.07},
+  FRA:{name:"France",group:"I",prob:14.5},  IRQ:{name:"Iraq",group:"I",prob:0.05},
+  NOR:{name:"Norway",group:"I",prob:3.2},   SEN:{name:"Senegal",group:"I",prob:0.85},
+  ALG:{name:"Algeria",group:"J",prob:0.22}, AUT:{name:"Austria",group:"J",prob:0.70},
+  JOR:{name:"Jordan",group:"J",prob:0.03},  ARG:{name:"Argentina",group:"J",prob:8.0},
+  POR:{name:"Portugal",group:"K",prob:10.0}, COL:{name:"Colombia",group:"K",prob:2.5},
+  COD:{name:"DR Congo",group:"K",prob:0.08}, UZB:{name:"Uzbekistan",group:"K",prob:0.05},
+  ENG:{name:"England",group:"L",prob:11.5}, GHA:{name:"Ghana",group:"L",prob:0.25},
+  CRO:{name:"Croatia",group:"L",prob:0.12}, PAN:{name:"Panama",group:"L",prob:0.07},
 };
 
-const PROB = {
-  "Spain":15.0,"France":14.5,"England":11.5,"Portugal":10.0,"Brazil":9.5,
-  "Argentina":8.0,"Germany":6.5,"Netherlands":5.0,"Norway":3.2,"Belgium":3.2,
-  "Colombia":2.5,"Japan":2.0,"Morocco":1.8,"USA":1.5,"Mexico":1.4,
-  "Uruguay":1.4,"Switzerland":1.3,"Türkiye":1.0,"Ecuador":1.0,
-  "Senegal":0.85,"Austria":0.70,"Sweden":0.60,"Ivory Coast":0.45,
-  "Canada":0.45,"Scotland":0.40,"Czechia":0.35,"Ghana":0.25,
-  "Algeria":0.22,"Egypt":0.22,"South Korea":0.20,"Bosnia & Herz.":0.18,
-  "Tunisia":0.15,"Australia":0.12,"Iran":0.12,"Croatia":0.12,"Paraguay":0.12,
-  "South Africa":0.08,"DR Congo":0.08,"Cabo Verde":0.07,"Saudi Arabia":0.07,
-  "Panama":0.07,"Jordan":0.03,"Uzbekistan":0.05,"Qatar":0.05,
-  "New Zealand":0.05,"Iraq":0.05,"Haiti":0.03,"Curaçao":0.03
-};
-
-const OWNER = {};
-Object.entries(P).forEach(([n,d])=>d.teams.forEach(t=>OWNER[t]=n));
-// Aliases: alternate spellings that may appear in future data feeds, mapped to the same owner.
-Object.assign(OWNER,{"Bosnia & Herzegovina":"Matteo","Cape Verde":"Neil","Korea Republic":"Tom","Côte d'Ivoire":"Seb"});
+// Participants → their two team IDs.
+const POOL = [
+  {id:"matt",     name:"Matt",     color:"#f87171",bg:"rgba(248,113,113,.15)", teams:["SEN","QAT"]},
+  {id:"jack",     name:"Jack",     color:"#fb923c",bg:"rgba(251,146,60,.15)",  teams:["MAR","IRQ"]},
+  {id:"anthony",  name:"Anthony",  color:"#facc15",bg:"rgba(250,204,21,.15)",  teams:["AUT","TUN"]},
+  {id:"ben",      name:"Ben",      color:"#4ade80",bg:"rgba(74,222,128,.15)",  teams:["ECU","CZE"]},
+  {id:"atticus",  name:"Atticus",  color:"#22d3ee",bg:"rgba(34,211,238,.15)",  teams:["ARG","KSA"]},
+  {id:"rob",      name:"Rob",      color:"#c084fc",bg:"rgba(192,132,252,.15)", teams:["EGY","NZL"]},
+  {id:"seb",      name:"Seb",      color:"#60a5fa",bg:"rgba(96,165,250,.15)",  teams:["NOR","CIV"]},
+  {id:"rui",      name:"Rui",      color:"#34d399",bg:"rgba(52,211,153,.15)",  teams:["USA","CAN"]},
+  {id:"saul",     name:"Saul",     color:"#fb7185",bg:"rgba(251,113,133,.15)", teams:["JPN","GHA"]},
+  {id:"neil",     name:"Neil",     color:"#a78bfa",bg:"rgba(167,139,250,.15)", teams:["BEL","CPV"]},
+  {id:"sam",      name:"Sam",      color:"#2dd4bf",bg:"rgba(45,212,191,.15)",  teams:["TUR","ALG"]},
+  {id:"kevin",    name:"Kevin",    color:"#fbbf24",bg:"rgba(251,191,36,.15)",  teams:["ESP","CUW"]},
+  {id:"matteo",   name:"Matteo",   color:"#f472b6",bg:"rgba(244,114,182,.15)", teams:["BRA","BIH"]},
+  {id:"pete",     name:"Pete",     color:"#818cf8",bg:"rgba(129,140,248,.15)", teams:["COL","PAN"]},
+  {id:"brian",    name:"Brian",    color:"#a3e635",bg:"rgba(163,230,53,.15)",  teams:["URU","RSA"]},
+  {id:"keith",    name:"Keith",    color:"#f43f5e",bg:"rgba(244,63,94,.15)",   teams:["GER","COD"]},
+  {id:"eric",     name:"Eric",     color:"#38bdf8",bg:"rgba(56,189,248,.15)",  teams:["MEX","IRN"]},
+  {id:"carlos",   name:"Carlos",   color:"#e879f9",bg:"rgba(232,121,249,.15)", teams:["POR","UZB"]},
+  {id:"thomas",   name:"Thomas",   color:"#94a3b8",bg:"rgba(148,163,184,.15)", teams:["SUI","AUS"]},
+  {id:"peter",    name:"Péter",    color:"#ff9500",bg:"rgba(255,149,0,.15)",   teams:["FRA","SWE"]},
+  {id:"thomas-l", name:"Thomas L", color:"#6ee7b7",bg:"rgba(110,231,183,.15)", teams:["ENG","HAI"]},
+  {id:"paul",     name:"Paul",     color:"#a5b4fc",bg:"rgba(165,180,252,.15)", teams:["NED","SCO"]},
+  {id:"tom",      name:"Tom",      color:"#fda4af",bg:"rgba(253,164,175,.15)", teams:["KOR","JOR"]},
+  {id:"pete-n",   name:"Pete N",   color:"#cd7f32",bg:"rgba(205,127,50,.15)",  teams:["CRO","PAR"]},
+];
 
 const GC = {A:"#ef4444",B:"#f97316",C:"#eab308",D:"#22c55e",E:"#06b6d4",F:"#8b5cf6",G:"#ec4899",H:"#f43f5e",I:"#6366f1",J:"#14b8a6",K:"#a855f7",L:"#84cc16"};
 
-function own(t){return OWNER[t]||null}
-function col(t){const o=own(t);return o?P[o].color:null}
-function bg(t){const o=own(t);return o?P[o].bg:null}
-function prob(t){return PROB[t]||0}
+// ── Derived lookups (built from the canonical data above; no manual aliases) ──
+const PMAP={}; POOL.forEach(p=>PMAP[p.name]=p);                       // display name → participant
+const OWNER={}; POOL.forEach(p=>p.teams.forEach(t=>OWNER[t]=p.name)); // team ID → owner name
+
+// Civil wars derived: a participant whose two teams share a group will eliminate one of their own.
+const CIVIL_TEAMS=new Set(), CIVIL_PAIRS=[];
+POOL.forEach(p=>{ const [a,b]=p.teams;
+  if(TEAMS[a]&&TEAMS[b]&&TEAMS[a].group===TEAMS[b].group){
+    CIVIL_TEAMS.add(a); CIVIL_TEAMS.add(b);
+    CIVIL_PAIRS.push({owner:p.name,a,b,group:TEAMS[a].group});
+  }
+});
+
+// Group ID → array of team IDs (derived from TEAMS, in A–L order).
+const GROUPS={}; Object.keys(GC).forEach(g=>GROUPS[g]=[]);
+Object.keys(TEAMS).forEach(id=>{ (GROUPS[TEAMS[id].group]=GROUPS[TEAMS[id].group]||[]).push(id); });
+
+function teamName(id){return TEAMS[id]?TEAMS[id].name:id}
+function own(id){return OWNER[id]||null}
+function col(id){const o=own(id);return o?PMAP[o].color:null}
+function bg(id){const o=own(id);return o?PMAP[o].bg:null}
+function prob(id){return TEAMS[id]?TEAMS[id].prob:0}
 
 // Escape a string for safe interpolation into HTML text / attributes.
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -326,79 +356,80 @@ function deviceZone(){
 function effectiveZone(){ return TZ_SEL==="auto" ? deviceZone() : TZ_SEL; }
 
 // ─── MATCHES ──────────────────────────────────────────────────────────────────
+// home/away are team IDs. The `civil` flag is derived at render time (own(home)===own(away)).
 const MATCHES=[
-{id:1, g:"A",md:1,date:"Jun 11",s:11,time:"3:00 PM",    home:"Mexico",        away:"South Africa",   venue:"Estadio Azteca, Mexico City"},
-{id:2, g:"A",md:1,date:"Jun 11",s:11,time:"10:00 PM",   home:"South Korea",   away:"Czechia",        venue:"Estadio Akron, Guadalajara"},
-{id:3, g:"A",md:2,date:"Jun 18",s:18,time:"12:00 PM",   home:"Czechia",       away:"South Africa",   venue:"Mercedes-Benz Stadium, Atlanta"},
-{id:4, g:"A",md:2,date:"Jun 18",s:18,time:"9:00 PM",    home:"Mexico",        away:"South Korea",    venue:"Estadio Akron, Guadalajara"},
-{id:5, g:"A",md:3,date:"Jun 24",s:24,time:"9:00 PM",    home:"Czechia",       away:"Mexico",         venue:"Estadio Azteca, Mexico City",    sim:true},
-{id:6, g:"A",md:3,date:"Jun 24",s:24,time:"9:00 PM",    home:"South Africa",  away:"South Korea",    venue:"Estadio BBVA, Monterrey",        sim:true},
-{id:7, g:"B",md:1,date:"Jun 12",s:12,time:"3:00 PM",    home:"Canada",        away:"Bosnia & Herz.", venue:"BMO Field, Toronto"},
-{id:8, g:"B",md:1,date:"Jun 13",s:13,time:"3:00 PM",    home:"Qatar",         away:"Switzerland",    venue:"Levi's Stadium, Santa Clara"},
-{id:9, g:"B",md:2,date:"Jun 18",s:18,time:"3:00 PM",    home:"Switzerland",   away:"Bosnia & Herz.", venue:"SoFi Stadium, Los Angeles"},
-{id:10,g:"B",md:2,date:"Jun 18",s:18,time:"6:00 PM",    home:"Canada",        away:"Qatar",          venue:"BC Place, Vancouver"},
-{id:11,g:"B",md:3,date:"Jun 24",s:24,time:"3:00 PM",    home:"Switzerland",   away:"Canada",         venue:"BC Place, Vancouver",            sim:true},
-{id:12,g:"B",md:3,date:"Jun 24",s:24,time:"3:00 PM",    home:"Bosnia & Herz.",away:"Qatar",          venue:"Lumen Field, Seattle",           sim:true},
-{id:13,g:"C",md:1,date:"Jun 13",s:13,time:"6:00 PM",    home:"Brazil",        away:"Morocco",        venue:"MetLife Stadium, New Jersey"},
-{id:14,g:"C",md:1,date:"Jun 13",s:13,time:"9:00 PM",    home:"Haiti",         away:"Scotland",       venue:"Gillette Stadium, Foxboro"},
-{id:15,g:"C",md:2,date:"Jun 19",s:19,time:"6:00 PM",    home:"Scotland",      away:"Morocco",        venue:"Gillette Stadium, Foxboro"},
-{id:16,g:"C",md:2,date:"Jun 19",s:19,time:"8:30 PM",    home:"Brazil",        away:"Haiti",          venue:"Lincoln Financial Field, Philadelphia"},
-{id:17,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"Scotland",      away:"Brazil",         venue:"Hard Rock Stadium, Miami",       sim:true},
-{id:18,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"Morocco",       away:"Haiti",          venue:"Mercedes-Benz Stadium, Atlanta", sim:true},
-{id:19,g:"D",md:1,date:"Jun 12",s:12,time:"9:00 PM",    home:"USA",           away:"Paraguay",       venue:"SoFi Stadium, Los Angeles"},
-{id:20,g:"D",md:1,date:"Jun 13",s:13,time:"Midnight",   home:"Australia",     away:"Türkiye",        venue:"BC Place, Vancouver"},
-{id:21,g:"D",md:2,date:"Jun 19",s:19,time:"3:00 PM",    home:"USA",           away:"Australia",      venue:"Lumen Field, Seattle"},
-{id:22,g:"D",md:2,date:"Jun 19",s:19,time:"11:00 PM",   home:"Türkiye",       away:"Paraguay",       venue:"Levi's Stadium, Santa Clara"},
-{id:23,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"Türkiye",       away:"USA",            venue:"SoFi Stadium, Los Angeles",      sim:true},
-{id:24,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"Paraguay",      away:"Australia",      venue:"Levi's Stadium, Santa Clara",    sim:true},
-{id:25,g:"E",md:1,date:"Jun 14",s:14,time:"1:00 PM",    home:"Germany",       away:"Curaçao",        venue:"NRG Stadium, Houston"},
-{id:26,g:"E",md:1,date:"Jun 14",s:14,time:"7:00 PM",    home:"Ivory Coast",   away:"Ecuador",        venue:"Lincoln Financial Field, Philadelphia"},
-{id:27,g:"E",md:2,date:"Jun 20",s:20,time:"4:00 PM",    home:"Germany",       away:"Ivory Coast",    venue:"BMO Field, Toronto"},
-{id:28,g:"E",md:2,date:"Jun 20",s:20,time:"8:00 PM",    home:"Ecuador",       away:"Curaçao",        venue:"Arrowhead Stadium, Kansas City"},
-{id:29,g:"E",md:3,date:"Jun 25",s:25,time:"4:00 PM",    home:"Curaçao",       away:"Ivory Coast",    venue:"Lincoln Financial Field, Philadelphia", sim:true},
-{id:30,g:"E",md:3,date:"Jun 25",s:25,time:"4:00 PM",    home:"Ecuador",       away:"Germany",        venue:"MetLife Stadium, New Jersey",    sim:true},
-{id:31,g:"F",md:1,date:"Jun 14",s:14,time:"4:00 PM",    home:"Netherlands",   away:"Japan",          venue:"AT&T Stadium, Arlington"},
-{id:32,g:"F",md:1,date:"Jun 14",s:14,time:"10:00 PM",   home:"Sweden",        away:"Tunisia",        venue:"Estadio Akron, Guadalajara"},
-{id:33,g:"F",md:2,date:"Jun 20",s:20,time:"1:00 PM",    home:"Netherlands",   away:"Sweden",         venue:"NRG Stadium, Houston"},
-{id:34,g:"F",md:2,date:"Jun 20",s:20,time:"Midnight",   home:"Tunisia",       away:"Japan",          venue:"Estadio Akron, Guadalajara"},
-{id:35,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Netherlands",   away:"Tunisia",        venue:"TBD",                           sim:true,est:true},
-{id:36,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Sweden",        away:"Japan",          venue:"TBD",                           sim:true,est:true},
-{id:37,g:"G",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"Belgium",       away:"Egypt",          venue:"Lumen Field, Seattle"},
-{id:38,g:"G",md:1,date:"Jun 15",s:15,time:"Midnight",   home:"Iran",          away:"New Zealand",    venue:"SoFi Stadium, Los Angeles"},
-{id:39,g:"G",md:2,date:"Jun 21",s:21,time:"3:00 PM",    home:"Belgium",       away:"Iran",           venue:"SoFi Stadium, Los Angeles"},
-{id:40,g:"G",md:2,date:"Jun 21",s:21,time:"9:00 PM",    home:"New Zealand",   away:"Egypt",          venue:"BC Place, Vancouver",           civil:true},
-{id:41,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Belgium",       away:"New Zealand",    venue:"TBD",                           sim:true,est:true},
-{id:42,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Egypt",         away:"Iran",           venue:"TBD",                           sim:true,est:true},
-{id:43,g:"H",md:1,date:"Jun 15",s:15,time:"1:00 PM",    home:"Spain",         away:"Cabo Verde",     venue:"Mercedes-Benz Stadium, Atlanta"},
-{id:44,g:"H",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"Saudi Arabia",  away:"Uruguay",        venue:"Hard Rock Stadium, Miami"},
-{id:45,g:"H",md:2,date:"Jun 21",s:21,time:"12:00 PM",   home:"Spain",         away:"Saudi Arabia",   venue:"Mercedes-Benz Stadium, Atlanta"},
-{id:46,g:"H",md:2,date:"Jun 21",s:21,time:"6:00 PM",    home:"Uruguay",       away:"Cabo Verde",     venue:"Hard Rock Stadium, Miami"},
-{id:47,g:"H",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Spain",         away:"Uruguay",        venue:"TBD",                           sim:true,est:true},
-{id:48,g:"H",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Saudi Arabia",  away:"Cabo Verde",     venue:"TBD",                           sim:true,est:true},
-{id:49,g:"I",md:1,date:"Jun 16",s:16,time:"3:00 PM",    home:"France",        away:"Senegal",        venue:"MetLife Stadium, New Jersey"},
-{id:50,g:"I",md:1,date:"Jun 16",s:16,time:"6:00 PM",    home:"Iraq",          away:"Norway",         venue:"Gillette Stadium, Foxboro"},
-{id:51,g:"I",md:2,date:"Jun 22",s:22,time:"5:00 PM",    home:"France",        away:"Iraq",           venue:"Lincoln Financial Field, Philadelphia"},
-{id:52,g:"I",md:2,date:"Jun 22",s:22,time:"8:00 PM",    home:"Norway",        away:"Senegal",        venue:"MetLife Stadium, New Jersey"},
-{id:53,g:"I",md:3,date:"Jun 26",s:26,time:"~est.",      home:"France",        away:"Norway",         venue:"TBD",                           sim:true,est:true},
-{id:54,g:"I",md:3,date:"Jun 26",s:26,time:"~est.",      home:"Senegal",       away:"Iraq",           venue:"TBD",                           sim:true,est:true},
-{id:55,g:"J",md:1,date:"Jun 16",s:16,time:"9:00 PM",    home:"Argentina",     away:"Algeria",        venue:"Arrowhead Stadium, Kansas City"},
-{id:56,g:"J",md:1,date:"Jun 16",s:16,time:"9:00 PM",    home:"Austria",       away:"Jordan",         venue:"Levi's Stadium, Santa Clara"},
-{id:57,g:"J",md:2,date:"Jun 22",s:22,time:"1:00 PM",    home:"Argentina",     away:"Austria",        venue:"AT&T Stadium, Arlington"},
-{id:58,g:"J",md:2,date:"Jun 22",s:22,time:"11:00 PM",   home:"Jordan",        away:"Algeria",        venue:"Levi's Stadium, Santa Clara"},
-{id:59,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"Argentina",     away:"Jordan",         venue:"TBD",                           sim:true,est:true},
-{id:60,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"Algeria",       away:"Austria",        venue:"TBD",                           sim:true,est:true},
-{id:61,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"Portugal",      away:"Colombia",       venue:"TBD",                           est:true},
-{id:62,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"DR Congo",      away:"Uzbekistan",     venue:"TBD",                           est:true},
-{id:63,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"Portugal",      away:"DR Congo",       venue:"TBD",                           est:true},
-{id:64,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"Uzbekistan",    away:"Colombia",       venue:"TBD",                           est:true},
-{id:65,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"Colombia",      away:"DR Congo",       venue:"TBD",                           sim:true,est:true},
-{id:66,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"Uzbekistan",    away:"Portugal",       venue:"TBD",                           sim:true,est:true,civil:true},
-{id:67,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"England",       away:"Croatia",        venue:"TBD",                           est:true},
-{id:68,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"Ghana",         away:"Panama",         venue:"TBD",                           est:true},
-{id:69,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"England",       away:"Ghana",          venue:"TBD",                           est:true},
-{id:70,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"Panama",        away:"Croatia",        venue:"TBD",                           est:true},
-{id:71,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"England",       away:"Panama",         venue:"TBD",                           sim:true,est:true},
-{id:72,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"Croatia",       away:"Ghana",          venue:"TBD",                           sim:true,est:true},
+{id:1, g:"A",md:1,date:"Jun 11",s:11,time:"3:00 PM",    home:"MEX",away:"RSA", venue:"Estadio Azteca, Mexico City"},
+{id:2, g:"A",md:1,date:"Jun 11",s:11,time:"10:00 PM",   home:"KOR",away:"CZE", venue:"Estadio Akron, Guadalajara"},
+{id:3, g:"A",md:2,date:"Jun 18",s:18,time:"12:00 PM",   home:"CZE",away:"RSA", venue:"Mercedes-Benz Stadium, Atlanta"},
+{id:4, g:"A",md:2,date:"Jun 18",s:18,time:"9:00 PM",    home:"MEX",away:"KOR", venue:"Estadio Akron, Guadalajara"},
+{id:5, g:"A",md:3,date:"Jun 24",s:24,time:"9:00 PM",    home:"CZE",away:"MEX", venue:"Estadio Azteca, Mexico City",    sim:true},
+{id:6, g:"A",md:3,date:"Jun 24",s:24,time:"9:00 PM",    home:"RSA",away:"KOR", venue:"Estadio BBVA, Monterrey",        sim:true},
+{id:7, g:"B",md:1,date:"Jun 12",s:12,time:"3:00 PM",    home:"CAN",away:"BIH", venue:"BMO Field, Toronto"},
+{id:8, g:"B",md:1,date:"Jun 13",s:13,time:"3:00 PM",    home:"QAT",away:"SUI", venue:"Levi's Stadium, Santa Clara"},
+{id:9, g:"B",md:2,date:"Jun 18",s:18,time:"3:00 PM",    home:"SUI",away:"BIH", venue:"SoFi Stadium, Los Angeles"},
+{id:10,g:"B",md:2,date:"Jun 18",s:18,time:"6:00 PM",    home:"CAN",away:"QAT", venue:"BC Place, Vancouver"},
+{id:11,g:"B",md:3,date:"Jun 24",s:24,time:"3:00 PM",    home:"SUI",away:"CAN", venue:"BC Place, Vancouver",            sim:true},
+{id:12,g:"B",md:3,date:"Jun 24",s:24,time:"3:00 PM",    home:"BIH",away:"QAT", venue:"Lumen Field, Seattle",           sim:true},
+{id:13,g:"C",md:1,date:"Jun 13",s:13,time:"6:00 PM",    home:"BRA",away:"MAR", venue:"MetLife Stadium, New Jersey"},
+{id:14,g:"C",md:1,date:"Jun 13",s:13,time:"9:00 PM",    home:"HAI",away:"SCO", venue:"Gillette Stadium, Foxboro"},
+{id:15,g:"C",md:2,date:"Jun 19",s:19,time:"6:00 PM",    home:"SCO",away:"MAR", venue:"Gillette Stadium, Foxboro"},
+{id:16,g:"C",md:2,date:"Jun 19",s:19,time:"8:30 PM",    home:"BRA",away:"HAI", venue:"Lincoln Financial Field, Philadelphia"},
+{id:17,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"SCO",away:"BRA", venue:"Hard Rock Stadium, Miami",       sim:true},
+{id:18,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"MAR",away:"HAI", venue:"Mercedes-Benz Stadium, Atlanta", sim:true},
+{id:19,g:"D",md:1,date:"Jun 12",s:12,time:"9:00 PM",    home:"USA",away:"PAR", venue:"SoFi Stadium, Los Angeles"},
+{id:20,g:"D",md:1,date:"Jun 13",s:13,time:"Midnight",   home:"AUS",away:"TUR", venue:"BC Place, Vancouver"},
+{id:21,g:"D",md:2,date:"Jun 19",s:19,time:"3:00 PM",    home:"USA",away:"AUS", venue:"Lumen Field, Seattle"},
+{id:22,g:"D",md:2,date:"Jun 19",s:19,time:"11:00 PM",   home:"TUR",away:"PAR", venue:"Levi's Stadium, Santa Clara"},
+{id:23,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"TUR",away:"USA", venue:"SoFi Stadium, Los Angeles",      sim:true},
+{id:24,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"PAR",away:"AUS", venue:"Levi's Stadium, Santa Clara",    sim:true},
+{id:25,g:"E",md:1,date:"Jun 14",s:14,time:"1:00 PM",    home:"GER",away:"CUW", venue:"NRG Stadium, Houston"},
+{id:26,g:"E",md:1,date:"Jun 14",s:14,time:"7:00 PM",    home:"CIV",away:"ECU", venue:"Lincoln Financial Field, Philadelphia"},
+{id:27,g:"E",md:2,date:"Jun 20",s:20,time:"4:00 PM",    home:"GER",away:"CIV", venue:"BMO Field, Toronto"},
+{id:28,g:"E",md:2,date:"Jun 20",s:20,time:"8:00 PM",    home:"ECU",away:"CUW", venue:"Arrowhead Stadium, Kansas City"},
+{id:29,g:"E",md:3,date:"Jun 25",s:25,time:"4:00 PM",    home:"CUW",away:"CIV", venue:"Lincoln Financial Field, Philadelphia", sim:true},
+{id:30,g:"E",md:3,date:"Jun 25",s:25,time:"4:00 PM",    home:"ECU",away:"GER", venue:"MetLife Stadium, New Jersey",    sim:true},
+{id:31,g:"F",md:1,date:"Jun 14",s:14,time:"4:00 PM",    home:"NED",away:"JPN", venue:"AT&T Stadium, Arlington"},
+{id:32,g:"F",md:1,date:"Jun 14",s:14,time:"10:00 PM",   home:"SWE",away:"TUN", venue:"Estadio Akron, Guadalajara"},
+{id:33,g:"F",md:2,date:"Jun 20",s:20,time:"1:00 PM",    home:"NED",away:"SWE", venue:"NRG Stadium, Houston"},
+{id:34,g:"F",md:2,date:"Jun 20",s:20,time:"Midnight",   home:"TUN",away:"JPN", venue:"Estadio Akron, Guadalajara"},
+{id:35,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"NED",away:"TUN", venue:"TBD",                           sim:true,est:true},
+{id:36,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"SWE",away:"JPN", venue:"TBD",                           sim:true,est:true},
+{id:37,g:"G",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"BEL",away:"EGY", venue:"Lumen Field, Seattle"},
+{id:38,g:"G",md:1,date:"Jun 15",s:15,time:"Midnight",   home:"IRN",away:"NZL", venue:"SoFi Stadium, Los Angeles"},
+{id:39,g:"G",md:2,date:"Jun 21",s:21,time:"3:00 PM",    home:"BEL",away:"IRN", venue:"SoFi Stadium, Los Angeles"},
+{id:40,g:"G",md:2,date:"Jun 21",s:21,time:"9:00 PM",    home:"NZL",away:"EGY", venue:"BC Place, Vancouver"},
+{id:41,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"BEL",away:"NZL", venue:"TBD",                           sim:true,est:true},
+{id:42,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"EGY",away:"IRN", venue:"TBD",                           sim:true,est:true},
+{id:43,g:"H",md:1,date:"Jun 15",s:15,time:"1:00 PM",    home:"ESP",away:"CPV", venue:"Mercedes-Benz Stadium, Atlanta"},
+{id:44,g:"H",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"KSA",away:"URU", venue:"Hard Rock Stadium, Miami"},
+{id:45,g:"H",md:2,date:"Jun 21",s:21,time:"12:00 PM",   home:"ESP",away:"KSA", venue:"Mercedes-Benz Stadium, Atlanta"},
+{id:46,g:"H",md:2,date:"Jun 21",s:21,time:"6:00 PM",    home:"URU",away:"CPV", venue:"Hard Rock Stadium, Miami"},
+{id:47,g:"H",md:3,date:"Jun 26",s:26,time:"~est.",      home:"ESP",away:"URU", venue:"TBD",                           sim:true,est:true},
+{id:48,g:"H",md:3,date:"Jun 26",s:26,time:"~est.",      home:"KSA",away:"CPV", venue:"TBD",                           sim:true,est:true},
+{id:49,g:"I",md:1,date:"Jun 16",s:16,time:"3:00 PM",    home:"FRA",away:"SEN", venue:"MetLife Stadium, New Jersey"},
+{id:50,g:"I",md:1,date:"Jun 16",s:16,time:"6:00 PM",    home:"IRQ",away:"NOR", venue:"Gillette Stadium, Foxboro"},
+{id:51,g:"I",md:2,date:"Jun 22",s:22,time:"5:00 PM",    home:"FRA",away:"IRQ", venue:"Lincoln Financial Field, Philadelphia"},
+{id:52,g:"I",md:2,date:"Jun 22",s:22,time:"8:00 PM",    home:"NOR",away:"SEN", venue:"MetLife Stadium, New Jersey"},
+{id:53,g:"I",md:3,date:"Jun 26",s:26,time:"~est.",      home:"FRA",away:"NOR", venue:"TBD",                           sim:true,est:true},
+{id:54,g:"I",md:3,date:"Jun 26",s:26,time:"~est.",      home:"SEN",away:"IRQ", venue:"TBD",                           sim:true,est:true},
+{id:55,g:"J",md:1,date:"Jun 16",s:16,time:"9:00 PM",    home:"ARG",away:"ALG", venue:"Arrowhead Stadium, Kansas City"},
+{id:56,g:"J",md:1,date:"Jun 16",s:16,time:"9:00 PM",    home:"AUT",away:"JOR", venue:"Levi's Stadium, Santa Clara"},
+{id:57,g:"J",md:2,date:"Jun 22",s:22,time:"1:00 PM",    home:"ARG",away:"AUT", venue:"AT&T Stadium, Arlington"},
+{id:58,g:"J",md:2,date:"Jun 22",s:22,time:"11:00 PM",   home:"JOR",away:"ALG", venue:"Levi's Stadium, Santa Clara"},
+{id:59,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ARG",away:"JOR", venue:"TBD",                           sim:true,est:true},
+{id:60,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ALG",away:"AUT", venue:"TBD",                           sim:true,est:true},
+{id:61,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"POR",away:"COL", venue:"TBD",                           est:true},
+{id:62,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"COD",away:"UZB", venue:"TBD",                           est:true},
+{id:63,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"POR",away:"COD", venue:"TBD",                           est:true},
+{id:64,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"UZB",away:"COL", venue:"TBD",                           est:true},
+{id:65,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"COL",away:"COD", venue:"TBD",                           sim:true,est:true},
+{id:66,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"UZB",away:"POR", venue:"TBD",                           sim:true,est:true},
+{id:67,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"ENG",away:"CRO", venue:"TBD",                           est:true},
+{id:68,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"GHA",away:"PAN", venue:"TBD",                           est:true},
+{id:69,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"ENG",away:"GHA", venue:"TBD",                           est:true},
+{id:70,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"PAN",away:"CRO", venue:"TBD",                           est:true},
+{id:71,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ENG",away:"PAN", venue:"TBD",                           sim:true,est:true},
+{id:72,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"CRO",away:"GHA", venue:"TBD",                           sim:true,est:true},
 ];
 
 // ─── SELECTION ────────────────────────────────────────────────────────────────
@@ -411,9 +442,9 @@ function applyPersonSelection(name, save=true){
   const label = document.getElementById("person-pill-label");
   const clearBtn = document.getElementById("person-pill-clear");
 
-  if(name && P[name]){
-    root.style.setProperty("--sel-color", P[name].color);
-    root.style.setProperty("--sel-bg", P[name].bg);
+  if(name && PMAP[name]){
+    root.style.setProperty("--sel-color", PMAP[name].color);
+    root.style.setProperty("--sel-bg", PMAP[name].bg);
     label.textContent = name;
     pill.classList.add("chosen");
     clearBtn.style.display = "inline";
@@ -464,9 +495,9 @@ function closeModal(){ document.getElementById("modal").style.display="none"; }
 
 // ─── RANKINGS ─────────────────────────────────────────────────────────────────
 function buildRankings(){
-  const ranked = Object.entries(P).map(([name,data])=>{
-    const p1=prob(data.teams[0]), p2=prob(data.teams[1]);
-    return {name,color:data.color,t1:data.teams[0],t2:data.teams[1],p1,p2,total:p1+p2};
+  const ranked = POOL.map(p=>{
+    const p1=prob(p.teams[0]), p2=prob(p.teams[1]);
+    return {name:p.name,color:p.color,t1:p.teams[0],t2:p.teams[1],p1,p2,total:p1+p2};
   }).sort((a,b)=>b.total-a.total);
   const max=ranked[0].total;
 
@@ -480,11 +511,11 @@ function buildRankings(){
 
   document.getElementById("rankings-list").innerHTML = ranked.map((r,i)=>{
     const t=tier(r.total), topCls=i<3?"top":"";
-    return `<div class="rank-row" data-person="${esc(r.name)}" title="${esc(r.t1)}: ${r.p1.toFixed(2)}% | ${esc(r.t2)}: ${r.p2.toFixed(2)}%">
+    return `<div class="rank-row" data-person="${esc(r.name)}" title="${esc(teamName(r.t1))}: ${r.p1.toFixed(2)}% | ${esc(teamName(r.t2))}: ${r.p2.toFixed(2)}%">
       <div class="rank-num ${topCls}">#${i+1}</div>
       <div class="rank-dot" style="background:${r.color}"></div>
       <div class="rank-name" style="color:${r.color}">${esc(r.name)}</div>
-      <div class="rank-teams">${esc(r.t1)} <span style="color:#1e3a5f">+</span> ${esc(r.t2)}</div>
+      <div class="rank-teams">${esc(teamName(r.t1))} <span style="color:#1e3a5f">+</span> ${esc(teamName(r.t2))}</div>
       <div class="tier-badge" style="background:${t.bg};color:${t.col}">${t.label}</div>
       <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.total/max*100).toFixed(1)}%;background:${r.color}"></div></div>
       <div class="rank-pct" style="color:${r.color}">${r.total.toFixed(1)}%</div>
@@ -493,10 +524,10 @@ function buildRankings(){
 }
 
 // ─── SCHEDULE ─────────────────────────────────────────────────────────────────
-function ownerTag(team){
-  const o=own(team);
-  if(!o) return `<span class="owner-tag none" data-team="${esc(team)}">—</span>`;
-  return `<span class="owner-tag" data-team="${esc(team)}" style="background:${bg(team)};color:${col(team)}">${esc(o)}</span>`;
+function ownerTag(id){
+  const o=own(id);
+  if(!o) return `<span class="owner-tag none" data-team="${id}">—</span>`;
+  return `<span class="owner-tag" data-team="${id}" style="background:${bg(id)};color:${col(id)}">${esc(o)}</span>`;
 }
 
 function buildSchedule(){
@@ -526,19 +557,20 @@ function buildSchedule(){
     html+=`<div class="date-group"><div class="date-label">${esc(g.label)}</div>`;
     g.items.forEach(({m,timeLabel})=>{
       const ho=own(m.home)||"", ao=own(m.away)||"";
+      const isCivil = !!ho && ho===ao;   // both teams owned by the same participant
       let cls="match-card";
-      if(m.civil) cls+=" civil-war";
-      html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${m.civil?1:0}">
+      if(isCivil) cls+=" civil-war";
+      html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
         <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${m.g}</div>
         <div class="team-side">
           ${ownerTag(m.home)}
-          <div class="team-name">${esc(m.home)}</div>
+          <div class="team-name">${esc(teamName(m.home))}</div>
         </div>
-        <div class="vs-col">vs${m.civil?`<span class="civil-icon">⚡</span>`:""}
+        <div class="vs-col">vs${isCivil?`<span class="civil-icon">⚡</span>`:""}
         </div>
         <div class="team-side right">
           ${ownerTag(m.away)}
-          <div class="team-name">${esc(m.away)}</div>
+          <div class="team-name">${esc(teamName(m.away))}</div>
         </div>
         <div class="match-meta">
           <div class="time">${esc(timeLabel)}</div>
@@ -595,38 +627,22 @@ function applyFilters(){
 }
 
 // ─── GROUPS ───────────────────────────────────────────────────────────────────
-const GROUPS={
-  A:["Mexico","South Africa","South Korea","Czechia"],
-  B:["Canada","Bosnia & Herz.","Qatar","Switzerland"],
-  C:["Brazil","Morocco","Haiti","Scotland"],
-  D:["USA","Paraguay","Australia","Türkiye"],
-  E:["Germany","Curaçao","Ivory Coast","Ecuador"],
-  F:["Netherlands","Sweden","Tunisia","Japan"],
-  G:["Belgium","Iran","Egypt","New Zealand"],
-  H:["Spain","Saudi Arabia","Uruguay","Cabo Verde"],
-  I:["France","Iraq","Norway","Senegal"],
-  J:["Algeria","Austria","Jordan","Argentina"],
-  K:["Portugal","Colombia","DR Congo","Uzbekistan"],
-  L:["England","Ghana","Croatia","Panama"],
-};
-
 function buildGroups(){
   let html="";
-  Object.entries(GROUPS).forEach(([grp,teams])=>{
+  Object.entries(GROUPS).forEach(([grp,teamIds])=>{
     html+=`<div class="group-card">
       <div class="group-card-header" style="color:${GC[grp]}">Group ${grp}</div>`;
     // Show each group sorted by win probability (strongest first).
-    teams.slice().sort((a,b)=>prob(b)-prob(a)).forEach(team=>{
-      const o=own(team), p=prob(team);
-      const cw=(o==="Rob"&&["Egypt","New Zealand"].includes(team))||(o==="Carlos"&&["Portugal","Uzbekistan"].includes(team));
+    teamIds.slice().sort((a,b)=>prob(b)-prob(a)).forEach(id=>{
+      const o=own(id), p=prob(id), cw=CIVIL_TEAMS.has(id);
       html+=`<div class="group-team-row" data-owner="${esc(o||'')}">
         <div>
-          <span class="group-team-name">${esc(team)}</span>
+          <span class="group-team-name">${esc(teamName(id))}</span>
           ${cw?`<span class="civil-marker">⚡</span>`:""}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:10px;color:#253550">${p.toFixed(2)}%</span>
-          ${o?`<span class="owner-tag" style="background:${bg(team)};color:${col(team)}">${esc(o)}</span>`
+          ${o?`<span class="owner-tag" style="background:${bg(id)};color:${col(id)}">${esc(o)}</span>`
              :`<span class="owner-tag none">unclaimed</span>`}
         </div>
       </div>`;
@@ -636,13 +652,23 @@ function buildGroups(){
   document.getElementById("groups-grid").innerHTML=html;
 }
 
+// Build the "Civil Wars" explainer from the derived pairs (no hardcoded names).
+function buildCivilNote(){
+  const el=document.getElementById("civil-note");
+  if(!el) return;
+  if(!CIVIL_PAIRS.length){ el.style.display="none"; return; }
+  const parts=CIVIL_PAIRS.map(c=>
+    `<strong>${esc(c.owner)}</strong> owns both <strong>${esc(teamName(c.a))}</strong> and <strong>${esc(teamName(c.b))}</strong> (Group ${c.group}).`);
+  el.innerHTML=`⚔️ <strong>Civil Wars</strong> — ${parts.join(" ")} One of their own teams will knock out the other. Marked <span style="color:#f59e0b">⚡</span>`;
+}
+
 // ─── MODAL ────────────────────────────────────────────────────────────────────
 function buildModal(){
   document.getElementById("person-grid").innerHTML=
-    Object.entries(P).map(([name,data])=>
-      `<button class="person-option" data-name="${esc(name)}"
-        style="color:${data.color};border-color:${data.color}40;background:${data.bg}"
-        onclick="applyPersonSelection(this.dataset.name)">${esc(name)}</button>`
+    POOL.map(p=>
+      `<button class="person-option" data-name="${esc(p.name)}"
+        style="color:${p.color};border-color:${p.color}40;background:${p.bg}"
+        onclick="applyPersonSelection(this.dataset.name)">${esc(p.name)}</button>`
     ).join("");
 }
 
@@ -664,6 +690,7 @@ try{
 document.getElementById("tz-select").value=TZ_SEL;
 
 buildRankings();
+buildCivilNote();
 buildSchedule();
 buildGroups();
 buildModal();
@@ -677,7 +704,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
 // Restore saved selection
 try{
   const saved=localStorage.getItem("wc-pool-person");
-  if(saved&&P[saved]) applyPersonSelection(saved, false);
+  if(saved&&PMAP[saved]) applyPersonSelection(saved, false);
 }catch(e){}
 </script>
 </body>

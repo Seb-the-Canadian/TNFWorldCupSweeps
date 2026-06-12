@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "purpose": "Participant → team-ID mapping. The only file humans edit when the roster changes.",
+    "team_ids": "Reference data/teams.json (FIFA 3-letter codes).",
+    "source_of_truth": "index.html inline POOL for now; kept in sync via scripts/check-data.js."
+  },
+  "pool_name": "WC 2026 Pool",
+  "created": "2026-06-10",
+  "participants": [
+    { "id": "matt",     "display": "Matt",     "color": "#f87171", "bg": "rgba(248,113,113,.15)", "teams": ["SEN", "QAT"] },
+    { "id": "jack",     "display": "Jack",     "color": "#fb923c", "bg": "rgba(251,146,60,.15)",  "teams": ["MAR", "IRQ"] },
+    { "id": "anthony",  "display": "Anthony",  "color": "#facc15", "bg": "rgba(250,204,21,.15)",  "teams": ["AUT", "TUN"] },
+    { "id": "ben",      "display": "Ben",      "color": "#4ade80", "bg": "rgba(74,222,128,.15)",  "teams": ["ECU", "CZE"] },
+    { "id": "atticus",  "display": "Atticus",  "color": "#22d3ee", "bg": "rgba(34,211,238,.15)",  "teams": ["ARG", "KSA"] },
+    { "id": "rob",      "display": "Rob",      "color": "#c084fc", "bg": "rgba(192,132,252,.15)", "teams": ["EGY", "NZL"] },
+    { "id": "seb",      "display": "Seb",      "color": "#60a5fa", "bg": "rgba(96,165,250,.15)",  "teams": ["NOR", "CIV"] },
+    { "id": "rui",      "display": "Rui",      "color": "#34d399", "bg": "rgba(52,211,153,.15)",  "teams": ["USA", "CAN"] },
+    { "id": "saul",     "display": "Saul",     "color": "#fb7185", "bg": "rgba(251,113,133,.15)", "teams": ["JPN", "GHA"] },
+    { "id": "neil",     "display": "Neil",     "color": "#a78bfa", "bg": "rgba(167,139,250,.15)", "teams": ["BEL", "CPV"] },
+    { "id": "sam",      "display": "Sam",      "color": "#2dd4bf", "bg": "rgba(45,212,191,.15)",  "teams": ["TUR", "ALG"] },
+    { "id": "kevin",    "display": "Kevin",    "color": "#fbbf24", "bg": "rgba(251,191,36,.15)",  "teams": ["ESP", "CUW"] },
+    { "id": "matteo",   "display": "Matteo",   "color": "#f472b6", "bg": "rgba(244,114,182,.15)", "teams": ["BRA", "BIH"] },
+    { "id": "pete",     "display": "Pete",     "color": "#818cf8", "bg": "rgba(129,140,248,.15)", "teams": ["COL", "PAN"] },
+    { "id": "brian",    "display": "Brian",    "color": "#a3e635", "bg": "rgba(163,230,53,.15)",  "teams": ["URU", "RSA"] },
+    { "id": "keith",    "display": "Keith",    "color": "#f43f5e", "bg": "rgba(244,63,94,.15)",   "teams": ["GER", "COD"] },
+    { "id": "eric",     "display": "Eric",     "color": "#38bdf8", "bg": "rgba(56,189,248,.15)",  "teams": ["MEX", "IRN"] },
+    { "id": "carlos",   "display": "Carlos",   "color": "#e879f9", "bg": "rgba(232,121,249,.15)", "teams": ["POR", "UZB"] },
+    { "id": "thomas",   "display": "Thomas",   "color": "#94a3b8", "bg": "rgba(148,163,184,.15)", "teams": ["SUI", "AUS"] },
+    { "id": "peter",    "display": "Péter",    "color": "#ff9500", "bg": "rgba(255,149,0,.15)",   "teams": ["FRA", "SWE"] },
+    { "id": "thomas-l", "display": "Thomas L", "color": "#6ee7b7", "bg": "rgba(110,231,183,.15)", "teams": ["ENG", "HAI"] },
+    { "id": "paul",     "display": "Paul",     "color": "#a5b4fc", "bg": "rgba(165,180,252,.15)", "teams": ["NED", "SCO"] },
+    { "id": "tom",      "display": "Tom",      "color": "#fda4af", "bg": "rgba(253,164,175,.15)", "teams": ["KOR", "JOR"] },
+    { "id": "pete-n",   "display": "Pete N",   "color": "#cd7f32", "bg": "rgba(205,127,50,.15)",  "teams": ["CRO", "PAR"] }
+  ]
+}

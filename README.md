@@ -32,15 +32,25 @@ Planned improvements live in [`ROADMAP.md`](ROADMAP.md).
 
 ## Editing the data
 
-All pool data is in plain JavaScript objects near the top of the `<script>` block in
-`index.html`:
+All pool data lives in plain JavaScript objects near the top of the `<script>` block in
+`index.html`, keyed by **canonical team IDs** (FIFA 3-letter codes — `ESP`, `CIV`, `CPV`…):
 
-- `P` — participants, their highlight colour, and their two teams.
-- `PROB` — each team's outright tournament-winner probability (%).
-- `MATCHES` — the full fixture list (date, time, venue, group, flags).
-- `GROUPS` — the four teams in each group.
+- `TEAMS` — every team's ID → display name, group, and win probability (%).
+- `POOL` — participants, their highlight colour, and their two team IDs.
+- `MATCHES` — the full fixture list (teams referenced by ID; date, time, venue, flags).
 
-After editing, commit and push to `main` — GitHub Pages redeploys automatically.
+Groups, owners, and civil wars are **derived** from the above — no need to edit them.
+
+`index.html` is the source of truth. The canonical files [`data/teams.json`](data/teams.json)
+(identity + per-source name aliases) and [`data/pool.json`](data/pool.json) mirror it and are
+what the planned data pipeline (see [`docs/analytics-architecture.md`](docs/analytics-architecture.md))
+will fetch. After editing the inline data, update those files to match and run:
+
+```
+npm test    # node scripts/check-data.js — fails if inline data and data/*.json drift
+```
+
+Then commit and push to `main` — GitHub Pages redeploys automatically.
 
 > Note: matchday-3 kickoff times/venues and Groups K & L pairings marked `~est.` are
 > estimated from the confirmed tournament pattern and should be confirmed once the
