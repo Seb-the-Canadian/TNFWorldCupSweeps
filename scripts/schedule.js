@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 /**
- * schedule.js — live-window guard. Prints "true" when a refresh is worthwhile, so the
- * 5-minute Action skips the thousands of no-op runs on quiet hours.
+ * schedule.js — refresh guard. Prints "true" when a refresh is worthwhile, so the
+ * scheduled Action does real work only during the group stage and goes quiet after.
  *
- * "Worthwhile" = data/matches.json is missing (bootstrap), OR any match is currently
- * marked live, OR any match kicks off within the next 30 min or kicked off within the
- * last 2.5h (matches run long, including stoppage/half-time).
+ * The feed's only kickoff field (local_date) is VENUE-local and can't be converted to a
+ * reliable instant without a per-stadium timezone map, so instead of a precise per-match
+ * window we use the group-stage date window (UTC). Within it we always refresh; commit-only-
+ * on-change (in refresh.js) keeps deploys minimal, and GitHub already throttles the cron.
+ *
+ * "true" = data/matches.json missing (bootstrap), OR now is within the group stage,
+ *          OR the feed still reports a live match.
  *
  *   node scripts/schedule.js   # → "true" | "false"
  */
@@ -13,7 +17,9 @@ const fs = require("fs");
 const path = require("path");
 
 const OUT = path.join(__dirname, "..", "data/matches.json");
-const MIN = 60 * 1000, HOUR = 60 * MIN;
+// Group stage: first game Jun 11; last (midnight/west-coast) games run into early Jun 28 UTC.
+const START = Date.parse("2026-06-11T00:00:00Z");
+const END = Date.parse("2026-06-28T06:00:00Z");
 
 function active() {
   let data;
@@ -21,12 +27,8 @@ function active() {
   catch (e) { return true; } // no file yet → allow the bootstrap fetch
 
   const now = Date.now();
-  return (data.matches || []).some((m) => {
-    if (m.status === "live") return true;
-    const k = Date.parse(m.kickoff_utc);
-    if (!isFinite(k)) return false;
-    return k <= now + 30 * MIN && k >= now - 2.5 * HOUR;
-  });
+  if (now >= START && now <= END) return true;
+  return (data.matches || []).some((m) => m.status === "live");
 }
 
 process.stdout.write(active() ? "true" : "false");
