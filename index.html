@@ -110,6 +110,18 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .match-meta .time{color:#94a3b8;font-weight:600}
 .sim-badge{font-size:9px;color:#f59e0b;letter-spacing:.04em}
 .est-badge{font-style:italic;color:#3d5270}
+.score{font-size:15px;font-weight:800;color:#f1f5f9;white-space:nowrap}
+.mstatus{font-size:9px;font-weight:800;letter-spacing:.05em;margin-top:1px}
+.mstatus.live{color:#f87171}
+.mstatus.ft{color:#64748b}
+.live-status{margin-bottom:12px;min-height:18px}
+.live-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#94a3b8}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.live-pill.livenow{color:#fca5a5}
+.live-pill.livenow .live-dot{background:#f87171;box-shadow:0 0 0 3px rgba(248,113,113,.22);animation:livepulse 1.4s infinite}
+.live-pill.stale{color:#f59e0b}
+.live-pill.stale .live-dot{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* GROUPS */
 .groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(254px,1fr));gap:10px}
@@ -212,6 +224,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
   <div class="my-filter-note" id="my-filter-note">👆 Select your name above to use "My Matches" filter.</div>
   <p class="sched-note">Match times are shown in your selected time zone (top-right) — change it any time. Group K &amp; L matchday pairings and all matchday 3 times/venues marked <em>~est.</em> are estimated from the confirmed tournament pattern.</p>
+  <div class="live-status" id="live-status"></div>
   <div id="schedule-list"></div>
   <div class="no-results" id="no-results">No matches match the current filters.</div>
 </div>
@@ -432,6 +445,54 @@ const MATCHES=[
 {id:72,g:"L",md:3,date:"Jun 27",s:27,time:"~est.",      home:"CRO",away:"GHA", venue:"TBD",                           sim:true,est:true},
 ];
 
+// ─── LIVE DATA (optional overlay) ───────────────────────────────────────────────
+// data/matches.json is produced by the refresh pipeline (GitHub Actions). It is keyed
+// by resolved team IDs, so the join is robust. When absent (e.g. before the pipeline
+// runs, or offline), the dashboard renders exactly as the static schedule — no errors.
+let LIVE = null; // { byKey:{key:match}, fetched_at, source } or null
+
+// Order-independent key so a home/away orientation difference between sources still joins.
+function matchKey(a,b,group){ return group+":"+[a,b].sort().join("-"); }
+
+async function loadLive(){
+  try{
+    const res = await fetch("data/matches.json", {cache:"no-store"});
+    if(!res.ok) return false;
+    const data = await res.json();
+    const byKey = {};
+    (data.matches||[]).forEach(m=>{ byKey[matchKey(m.home_id,m.away_id,m.group)] = m; });
+    LIVE = {byKey, fetched_at:data.fetched_at, source:data.source};
+    buildSchedule();
+    applyPersonSelection(SELECTED, false); // re-apply highlight/filters on fresh cards
+    updateFreshness();
+    return true;
+  }catch(e){ return false; }
+}
+
+function timeAgo(iso){
+  const ms = Date.now() - Date.parse(iso);
+  if(!isFinite(ms)) return "";
+  const m = Math.round(ms/60000);
+  if(m < 1) return "just now";
+  if(m < 60) return m+" min ago";
+  const h = Math.round(m/60);
+  return h+" hr"+(h>1?"s":"")+" ago";
+}
+
+function updateFreshness(){
+  const el = document.getElementById("live-status");
+  if(!el) return;
+  if(!LIVE || !LIVE.fetched_at){ el.innerHTML=""; return; }
+  const ageMin = (Date.now() - Date.parse(LIVE.fetched_at))/60000;
+  const liveNow = Object.values(LIVE.byKey).some(m=>m.status==="live");
+  const stale = ageMin > 10;
+  const cls = "live-pill" + (liveNow ? " livenow" : "") + (stale ? " stale" : "");
+  const label = liveNow
+    ? (stale ? "Live — scores may be delayed" : "Live now")
+    : "Scores updated "+timeAgo(LIVE.fetched_at);
+  el.innerHTML = `<span class="${cls}"><span class="live-dot"></span>${esc(label)}</span>`;
+}
+
 // ─── SELECTION ────────────────────────────────────────────────────────────────
 let SELECTED = null;
 
@@ -558,6 +619,18 @@ function buildSchedule(){
     g.items.forEach(({m,timeLabel})=>{
       const ho=own(m.home)||"", ao=own(m.away)||"";
       const isCivil = !!ho && ho===ao;   // both teams owned by the same participant
+
+      // Live overlay (if data/matches.json loaded). Scores re-oriented to our home/away.
+      const lv = LIVE && LIVE.byKey[matchKey(m.home,m.away,m.g)];
+      let center=`vs`, statusHtml="";
+      if(lv && lv.status && lv.status!=="scheduled" && lv.home_score!=null && lv.away_score!=null){
+        let hs=lv.home_score, as=lv.away_score;
+        if(lv.home_id && lv.home_id!==m.home){ const t=hs; hs=as; as=t; }
+        center=`<span class="score">${hs}–${as}</span>`;
+        if(lv.status==="live") statusHtml=`<div class="mstatus live">● LIVE${lv.minute?" "+esc(String(lv.minute))+"'":""}</div>`;
+        else if(lv.status==="completed") statusHtml=`<div class="mstatus ft">FULL TIME</div>`;
+      }
+
       let cls="match-card";
       if(isCivil) cls+=" civil-war";
       html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
@@ -566,14 +639,14 @@ function buildSchedule(){
           ${ownerTag(m.home)}
           <div class="team-name">${esc(teamName(m.home))}</div>
         </div>
-        <div class="vs-col">vs${isCivil?`<span class="civil-icon">⚡</span>`:""}
+        <div class="vs-col">${center}${isCivil?`<span class="civil-icon">⚡</span>`:""}
         </div>
         <div class="team-side right">
           ${ownerTag(m.away)}
           <div class="team-name">${esc(teamName(m.away))}</div>
         </div>
         <div class="match-meta">
-          <div class="time">${esc(timeLabel)}</div>
+          ${statusHtml||`<div class="time">${esc(timeLabel)}</div>`}
           ${m.sim?`<div class="sim-badge">SIMULTANEOUS</div>`:""}
           ${m.est?`<div class="est-badge">~estimated</div>`:""}
           <div style="font-size:9px;color:#253550;margin-top:1px">${m.venue!=="TBD"?esc(m.venue.split(",")[0]):""}</div>
@@ -706,6 +779,11 @@ try{
   const saved=localStorage.getItem("wc-pool-person");
   if(saved&&PMAP[saved]) applyPersonSelection(saved, false);
 }catch(e){}
+
+// Live scores: load once, then refresh every 60s while the tab is visible.
+// No-ops gracefully if data/matches.json doesn't exist yet.
+loadLive();
+setInterval(()=>{ if(!document.hidden) loadLive(); }, 60000);
 </script>
 </body>
 </html>

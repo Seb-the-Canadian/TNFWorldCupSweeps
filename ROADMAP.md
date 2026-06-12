@@ -33,8 +33,18 @@ civil-war countdown, conviction signal). Phased to ship value early and de-risk 
       ID-keyed `TEAMS`/`POOL` model (groups, owners, and civil wars now *derived*, not
       hardcoded). `scripts/check-data.js` (`npm test`) guards inline↔JSON drift. Removes the
       biggest failure mode (three sources disagreeing on team-name strings).
-- [ ] **Phase B — Live scores & standings.** worldcup26.ir adapter → `matches.json` /
-      `standings.json`; refresh Action with inline Pages deploy; loading/stale states in the UI.
+- [ ] **Phase B — Live scores & standings.** *In progress.*
+      - ✅ **Client live layer** (`index.html`): fetches `data/matches.json` (no-store, 60s
+        poll), overlays scores + LIVE/FULL-TIME status onto the schedule, shows a
+        freshness pill, and joins on team IDs (re-orienting scores). Zero regression —
+        renders the static schedule unchanged when no data file exists.
+      - ✅ **Pipeline scaffolding** (`scripts/`, `.github/workflows/site.yml`): worldcup26.ir
+        adapter (alias-resolved, fail-safe), refresh orchestrator (writes only on
+        change/live heartbeat), live-window guard, and inline Pages deploy with
+        concurrency + race-safe commits.
+      - ⏳ **Activate:** set Pages Source to *GitHub Actions* and merge to `main`; confirm
+        the upstream field names on the first real run (see "verify" below). Then add
+        standings → live group tables (Phase B-2).
 - [ ] **Phase C — Probabilities & analytics.** Polymarket Gamma adapter → `probabilities.json`
       + `pool-stats.json`; daily history snapshots; momentum, trajectory chart, conviction signal.
 

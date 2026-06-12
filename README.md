@@ -25,10 +25,29 @@ Planned improvements live in [`ROADMAP.md`](ROADMAP.md).
 
 ## Enabling GitHub Pages
 
-1. Go to the repo's **Settings → Pages**.
-2. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-3. Select the `main` branch and the `/ (root)` folder, then **Save**.
-4. Wait a minute, then visit the URL above.
+Set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, then merge
+to `main`. The [`site.yml`](.github/workflows/site.yml) workflow builds and deploys the site
+(and refreshes live data on a schedule). GitHub Actions deployment is required — the
+automated data commits use `GITHUB_TOKEN`, which does **not** trigger the classic
+"Deploy from a branch" build.
+
+The site is served at `https://seb-the-canadian.github.io/tnfworldcupsweeps/`.
+
+## Live data pipeline (Phase B)
+
+When `data/matches.json` is present, the dashboard overlays live scores and match status
+onto the Schedule tab and shows a freshness indicator; when it's absent it renders the
+static schedule unchanged. The file is produced by GitHub Actions:
+
+- `scripts/fetch-matches.js` — fetches worldcup26.ir and resolves every team to its
+  canonical ID via `data/teams.json` aliases (fails loudly on an unresolved name).
+- `scripts/refresh.js` — writes `data/matches.json` only when scores change (or a match is
+  live), keeping commits/deploys minimal.
+- `scripts/schedule.js` — guards the 5-minute cron so it only works during match windows.
+
+> First-run check: the upstream field names are mapped defensively but unverified. Watch the
+> first Actions run; if it errors on team resolution, add the missing alias to
+> `data/teams.json` (and run `npm test`).
 
 ## Editing the data
 
