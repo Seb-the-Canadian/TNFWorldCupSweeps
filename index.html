@@ -37,6 +37,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .person-pill-icon{font-size:14px}
 .person-pill-clear{margin-left:4px;opacity:.5;font-size:14px;line-height:1}
 .person-pill-clear:hover{opacity:1}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.tz-select{background:var(--surface2);color:var(--text);border:1px solid var(--border);
+  border-radius:20px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.tz-select:hover{border-color:#3b82f6;color:#93c5fd}
+.tz-select:focus{outline:none;border-color:var(--accent)}
 
 /* TABS */
 .tab-bar{display:flex;gap:2px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px}
@@ -155,10 +160,21 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <div class="header-sub">24 participants · 48 teams · Group stage: Jun 11 – Jun 27</div>
     </div>
   </div>
-  <div class="person-pill" id="person-pill" role="button" tabindex="0" aria-haspopup="dialog" onclick="openModal()">
-    <span class="person-pill-icon">👤</span>
-    <span id="person-pill-label">Who are you?</span>
-    <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()">✕</span>
+  <div class="header-right">
+    <select class="tz-select" id="tz-select" aria-label="Time zone" onchange="setTimezone(this.value)" title="Show match times in this time zone">
+      <option value="auto">🌐 Auto (device)</option>
+      <option value="America/New_York">Eastern</option>
+      <option value="America/Chicago">Central</option>
+      <option value="America/Denver">Mountain</option>
+      <option value="America/Los_Angeles">Pacific</option>
+      <option value="Europe/London">UK</option>
+      <option value="Europe/Paris">Central Europe</option>
+    </select>
+    <div class="person-pill" id="person-pill" role="button" tabindex="0" aria-haspopup="dialog" onclick="openModal()">
+      <span class="person-pill-icon">👤</span>
+      <span id="person-pill-label">Who are you?</span>
+      <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()">✕</span>
+    </div>
   </div>
 </div>
 
@@ -197,7 +213,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </select>
   </div>
   <div class="my-filter-note" id="my-filter-note">👆 Select your name above to use "My Matches" filter.</div>
-  <p class="sched-note">Times ET. Group K &amp; L matchday pairings and all matchday 3 venues marked <em>~est.</em> are estimated from the confirmed tournament pattern.</p>
+  <p class="sched-note">Match times are shown in your selected time zone (top-right) — change it any time. Group K &amp; L matchday pairings and all matchday 3 times/venues marked <em>~est.</em> are estimated from the confirmed tournament pattern.</p>
   <div id="schedule-list"></div>
   <div class="no-results" id="no-results">No matches match the current filters.</div>
 </div>
@@ -275,17 +291,39 @@ function prob(t){return PROB[t]||0}
 // Escape a string for safe interpolation into HTML text / attributes.
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
-// Convert a match's kickoff time to minutes-from-midnight for sorting within a day.
-// "Midnight" → 0 (start of day). "~est." / unknown → sorts last.
-function timeVal(m){
-  const t=m.time;
-  if(t==="Midnight") return 0;
-  const mt=/^(\d{1,2}):(\d{2})\s*(AM|PM)$/.exec(t);
-  if(!mt) return 9999;
-  let h=parseInt(mt[1],10)%12;
-  if(mt[3]==="PM") h+=12;
-  return h*60+parseInt(mt[2],10);
+// ─── TIME ZONES ───────────────────────────────────────────────────────────────
+// Stored kickoff times are US Eastern. June 2026 is on EDT (UTC-4), so the absolute
+// instant of a match is its ET clock time + 4 hours. We build a real UTC Date per
+// match and let Intl.DateTimeFormat render it in whatever zone the viewer picks —
+// which also shifts the calendar date correctly across zones.
+const MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+const SEASON_YEAR=2026;
+const ET_UTC_OFFSET=4; // hours to add to ET to reach UTC during EDT (the whole group stage)
+
+// Returns a Date (absolute instant) for a match, or null when the time is unknown (~est.).
+function matchInstant(m){
+  if(m.time==="~est.") return null;
+  const parts=m.date.split(" ");
+  const mon=MONTHS[parts[0]], day=parseInt(parts[1],10);
+  let h,min;
+  if(m.time==="Midnight"){ h=0; min=0; }
+  else{
+    const mt=/^(\d{1,2}):(\d{2})\s*(AM|PM)$/.exec(m.time);
+    if(!mt) return null;
+    h=parseInt(mt[1],10)%12; if(mt[3]==="PM") h+=12; min=parseInt(mt[2],10);
+  }
+  return new Date(Date.UTC(SEASON_YEAR, mon, day, h+ET_UTC_OFFSET, min));
 }
+
+// Valid picker values (besides "auto"); guards against stale/garbage localStorage.
+const TZ_IDS=["America/New_York","America/Chicago","America/Denver","America/Los_Angeles","Europe/London","Europe/Paris"];
+let TZ_SEL="auto";
+
+function deviceZone(){
+  try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }
+  catch(e){ return "America/New_York"; }
+}
+function effectiveZone(){ return TZ_SEL==="auto" ? deviceZone() : TZ_SEL; }
 
 // ─── MATCHES ──────────────────────────────────────────────────────────────────
 const MATCHES=[
@@ -462,41 +500,67 @@ function ownerTag(team){
 }
 
 function buildSchedule(){
-  const byDate={};
-  MATCHES.forEach(m=>{ if(!byDate[m.date]) byDate[m.date]=[]; byDate[m.date].push(m); });
+  const zone=effectiveZone();
+  const keyFmt =new Intl.DateTimeFormat("en-CA",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit"}); // YYYY-MM-DD sort key
+  const dayFmt =new Intl.DateTimeFormat("en-US",{timeZone:zone,weekday:"short",month:"short",day:"numeric"});  // header label
+  const timeFmt=new Intl.DateTimeFormat("en-US",{timeZone:zone,hour:"numeric",minute:"2-digit",timeZoneName:"short"});
+
+  // Build a display row per match, localized to the selected zone.
+  const rows=MATCHES.map(m=>{
+    const dt=matchInstant(m);
+    if(dt){
+      return {m,dt,dateKey:keyFmt.format(dt),dateLabel:dayFmt.format(dt),timeLabel:timeFmt.format(dt),sortT:dt.getTime()};
+    }
+    // Unknown time (~est.): keep its ET calendar day and sort after timed games.
+    return {m,dt:null,dateKey:`${SEASON_YEAR}-06-${String(m.s).padStart(2,"0")}`,dateLabel:m.date,timeLabel:"~est.",sortT:Number.MAX_SAFE_INTEGER};
+  });
+
+  // Group by local date, order days chronologically, order matches within a day by instant.
+  const groups={};
+  rows.forEach(r=>{ (groups[r.dateKey]=groups[r.dateKey]||{label:r.dateLabel,items:[]}).items.push(r); });
 
   let html="";
-  Object.keys(byDate).sort((a,b)=>byDate[a][0].s - byDate[b][0].s)
-    .forEach(date=>{
-      html+=`<div class="date-group">`;
-      html+=`<div class="date-label">${esc(date)}</div>`;
-      byDate[date].slice().sort((a,b)=>timeVal(a)-timeVal(b)).forEach(m=>{
-        const ho=own(m.home)||"", ao=own(m.away)||"";
-        let cls="match-card";
-        if(m.civil) cls+=" civil-war";
-        html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${m.civil?1:0}">
-          <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${m.g}</div>
-          <div class="team-side">
-            ${ownerTag(m.home)}
-            <div class="team-name">${esc(m.home)}</div>
-          </div>
-          <div class="vs-col">vs${m.civil?`<span class="civil-icon">⚡</span>`:""}
-          </div>
-          <div class="team-side right">
-            ${ownerTag(m.away)}
-            <div class="team-name">${esc(m.away)}</div>
-          </div>
-          <div class="match-meta">
-            <div class="time">${esc(m.time)}${m.time==="~est."?"":" ET"}</div>
-            ${m.sim?`<div class="sim-badge">SIMULTANEOUS</div>`:""}
-            ${m.est?`<div class="est-badge">~estimated</div>`:""}
-            <div style="font-size:9px;color:#253550;margin-top:1px">${m.venue!=="TBD"?esc(m.venue.split(",")[0]):""}</div>
-          </div>
-        </div>`;
-      });
-      html+="</div>";
+  Object.keys(groups).sort().forEach(key=>{
+    const g=groups[key];
+    g.items.sort((a,b)=> a.sortT-b.sortT || a.m.id-b.m.id);
+    html+=`<div class="date-group"><div class="date-label">${esc(g.label)}</div>`;
+    g.items.forEach(({m,timeLabel})=>{
+      const ho=own(m.home)||"", ao=own(m.away)||"";
+      let cls="match-card";
+      if(m.civil) cls+=" civil-war";
+      html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${m.civil?1:0}">
+        <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${m.g}</div>
+        <div class="team-side">
+          ${ownerTag(m.home)}
+          <div class="team-name">${esc(m.home)}</div>
+        </div>
+        <div class="vs-col">vs${m.civil?`<span class="civil-icon">⚡</span>`:""}
+        </div>
+        <div class="team-side right">
+          ${ownerTag(m.away)}
+          <div class="team-name">${esc(m.away)}</div>
+        </div>
+        <div class="match-meta">
+          <div class="time">${esc(timeLabel)}</div>
+          ${m.sim?`<div class="sim-badge">SIMULTANEOUS</div>`:""}
+          ${m.est?`<div class="est-badge">~estimated</div>`:""}
+          <div style="font-size:9px;color:#253550;margin-top:1px">${m.venue!=="TBD"?esc(m.venue.split(",")[0]):""}</div>
+        </div>
+      </div>`;
     });
+    html+="</div>";
+  });
   document.getElementById("schedule-list").innerHTML=html;
+}
+
+// Switch the schedule's time zone, persist it, then re-render and re-apply highlighting/filters.
+function setTimezone(sel){
+  TZ_SEL = (sel==="auto"||TZ_IDS.includes(sel)) ? sel : "auto";
+  try{ localStorage.setItem("wc-pool-tz",TZ_SEL); }catch(e){}
+  const picker=document.getElementById("tz-select");
+  if(picker) picker.value=TZ_SEL;
+  buildSchedule();
+  applyPersonSelection(SELECTED,false); // re-highlight my-matches and re-run filters on fresh cards
 }
 
 function applyFilters(){
@@ -592,6 +656,13 @@ function switchTab(name,btn){
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+// Restore saved time zone first so the schedule renders in the right zone on load.
+try{
+  const tz=localStorage.getItem("wc-pool-tz");
+  if(tz==="auto"||TZ_IDS.includes(tz)) TZ_SEL=tz;
+}catch(e){}
+document.getElementById("tz-select").value=TZ_SEL;
+
 buildRankings();
 buildSchedule();
 buildGroups();

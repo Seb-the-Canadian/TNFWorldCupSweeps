@@ -17,8 +17,11 @@ Everything lives in [`index.html`](index.html). Open it in any browser and it ju
   time, with owner tags. Filter by group, "My Matches", pool battles, or civil wars.
 - **🗂 Groups** — who owns which team in each group, sorted by win probability.
 
-Pick your name (top-right) to highlight your teams and matches across every tab. The
-choice is saved in your browser's `localStorage`.
+Pick your name (top-right) to highlight your teams and matches across every tab, and
+choose a **time zone** to show every kickoff in your own local time (auto-detected by
+default). Both choices are saved in your browser's `localStorage`.
+
+Planned improvements live in [`ROADMAP.md`](ROADMAP.md).
 
 ## Enabling GitHub Pages
 
