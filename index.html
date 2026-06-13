@@ -25,7 +25,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   border-bottom:1px solid var(--border);padding:14px 20px;
   display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .header-left{display:flex;align-items:center;gap:12px}
-.header-logo{font-size:26px}
 .header-title{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#f1f5f9}
 .header-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .person-pill{display:flex;align-items:center;gap:8px;cursor:pointer;
@@ -34,8 +33,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   transition:.15s all;white-space:nowrap}
 .person-pill:hover{border-color:#3b82f6;color:#93c5fd}
 .person-pill.chosen{color:var(--sel-color);border-color:var(--sel-color);background:var(--sel-bg)}
-.person-pill-icon{font-size:14px}
-.person-pill-clear{margin-left:4px;opacity:.5;font-size:14px;line-height:1}
+.person-pill-clear{margin-left:4px;opacity:.5;line-height:1;cursor:pointer}
 .person-pill-clear:hover{opacity:1}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .tz-select{background:var(--surface2);color:var(--text);border:1px solid var(--border);
@@ -106,7 +104,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .owner-tag.me{box-shadow:0 0 0 1px var(--sel-color)}
 .owner-tag.none{color:var(--muted);background:transparent;font-weight:400}
 .vs-col{text-align:center;font-size:11px;font-weight:800;color:var(--muted)}
-.civil-icon{font-size:9px;color:#f59e0b;display:block;margin-top:2px}
+.civil-icon{color:#f59e0b;display:block;margin-top:2px}
 .match-meta{text-align:right;font-size:10px;color:var(--muted);line-height:1.6}
 .match-meta .time{color:#94a3b8;font-weight:600}
 .sim-badge{font-size:9px;color:#f59e0b;letter-spacing:.04em}
@@ -133,7 +131,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   padding:7px 13px;border-top:1px solid var(--border);transition:.1s background}
 .group-team-row.my-team{background:var(--sel-bg)!important;border-left:2px solid var(--sel-color)}
 .group-team-name{font-size:12px;color:#e2e8f0;font-weight:600}
-.civil-marker{font-size:9px;color:#f59e0b;margin-left:3px}
+.civil-marker{color:#f59e0b;margin-left:3px}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;
@@ -160,6 +158,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 @media(max-width:580px){
   .rank-bar-wrap,.tier-badge{display:none}
   .match-card{grid-template-columns:22px 1fr auto 1fr 70px}
+}
+
+/* Respect users who opt out of motion (the LIVE pulse becomes a steady dot). */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
 }
 
 /* Lucide icons (loaded from CDN; createIcons() swaps <i data-lucide> → <svg class="lucide">) */
@@ -195,6 +198,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .bteam.winner .bteam-name{color:#fff}
 .bscore{text-align:center;font-size:11px;font-weight:800;color:#94a3b8;margin-top:3px}
 .bscore .lv{color:#fca5a5}
+.pens{font-size:9px;font-weight:700;color:#64748b}
 
 /* Sub-tabs (Rankings page: Live Points / Odds) */
 .subtab-bar{display:inline-flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:14px}
@@ -230,16 +234,16 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="person-pill" id="person-pill" role="button" tabindex="0" aria-haspopup="dialog" onclick="openModal()">
       <span class="person-pill-icon"><i data-lucide="user"></i></span>
       <span id="person-pill-label">Who are you?</span>
-      <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()"><i data-lucide="x"></i></span>
+      <span id="person-pill-clear" class="person-pill-clear" style="display:none" role="button" tabindex="0" aria-label="Clear selection" onclick="event.stopPropagation();clearSelection()"><i data-lucide="x"></i></span>
     </div>
   </div>
 </div>
 
 <div class="tab-bar" role="tablist">
-  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('rankings',this)"><i data-lucide="award"></i>Rankings</button>
-  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('bracket',this)"><i data-lucide="git-fork"></i>Bracket</button>
-  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('schedule',this)"><i data-lucide="calendar"></i>Schedule</button>
-  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('groups',this)"><i data-lucide="layout-grid"></i>Groups</button>
+  <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-rankings" onclick="switchTab('rankings',this)"><i data-lucide="award"></i>Rankings</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-bracket" onclick="switchTab('bracket',this)"><i data-lucide="git-fork"></i>Bracket</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule',this)"><i data-lucide="calendar"></i>Schedule</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-groups" onclick="switchTab('groups',this)"><i data-lucide="layout-grid"></i>Groups</button>
 </div>
 
 <div id="tab-rankings" class="tab-content active" role="tabpanel">
@@ -248,7 +252,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <button class="subtab-btn" role="tab" aria-selected="false" onclick="switchSub('odds',this)">Pre-Tournament Odds</button>
   </div>
   <div id="sub-points" class="subview active">
-    <div class="desc-box"><strong>Live Points</strong> — each participant's score is the running sum of their two teams' match points: <strong>win 3, draw 1, loss 0</strong>, from completed matches (group stage now, knockouts later). Updates automatically as results come in.</div>
+    <div class="desc-box"><strong>Live Points</strong> — each participant's score is the running sum of their two teams' match points: <strong>win 3, draw 1, loss 0</strong>, from completed matches (group stage now, knockouts later; shoot-out wins count as wins). Team records are shown as <strong>W-D-L</strong>. Updates automatically as results come in.</div>
+    <div class="live-status" id="points-freshness"></div>
     <div id="standings-list"></div>
   </div>
   <div id="sub-odds" class="subview">
@@ -296,7 +301,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal" style="display:none" role="dialog" aria-modal="true" aria-label="Select your name" onclick="closeModal()">
-  <div class="modal-box" onclick="event.stopPropagation()">
+  <div class="modal-box" tabindex="-1" onclick="event.stopPropagation()">
     <div class="modal-title">Who are you?</div>
     <div class="modal-sub">Pick your name to highlight your teams and matches across all tabs. Your choice is remembered in this browser.</div>
     <div class="person-grid" id="person-grid"></div>
@@ -304,8 +309,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 </div>
 
-<!-- Lucide icons (https://lucide.dev) -->
-<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<!-- Lucide icons (https://lucide.dev). Pinned to major 0 (a future v1 could rename the UMD
+     global / icons); `defer` so a slow or blocked CDN can never stall page parsing — the
+     window 'load' hook in init re-runs drawIcons() once it arrives. -->
+<script defer src="https://cdn.jsdelivr.net/npm/lucide@0/dist/umd/lucide.min.js"></script>
 
 <script>
 // ─── CANONICAL DATA (Phase A — keyed by FIFA team IDs) ──────────────────────────
@@ -456,7 +463,7 @@ const MATCHES=[
 {id:17,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"SCO",away:"BRA", venue:"Hard Rock Stadium, Miami",       sim:true},
 {id:18,g:"C",md:3,date:"Jun 24",s:24,time:"6:00 PM",    home:"MAR",away:"HAI", venue:"Mercedes-Benz Stadium, Atlanta", sim:true},
 {id:19,g:"D",md:1,date:"Jun 12",s:12,time:"9:00 PM",    home:"USA",away:"PAR", venue:"SoFi Stadium, Los Angeles"},
-{id:20,g:"D",md:1,date:"Jun 13",s:13,time:"Midnight",   home:"AUS",away:"TUR", venue:"BC Place, Vancouver"},
+{id:20,g:"D",md:1,date:"Jun 14",s:14,time:"Midnight",   home:"AUS",away:"TUR", venue:"BC Place, Vancouver"},
 {id:21,g:"D",md:2,date:"Jun 19",s:19,time:"3:00 PM",    home:"USA",away:"AUS", venue:"Lumen Field, Seattle"},
 {id:22,g:"D",md:2,date:"Jun 19",s:19,time:"11:00 PM",   home:"TUR",away:"PAR", venue:"Levi's Stadium, Santa Clara"},
 {id:23,g:"D",md:3,date:"Jun 25",s:25,time:"10:00 PM",   home:"TUR",away:"USA", venue:"SoFi Stadium, Los Angeles",      sim:true},
@@ -470,11 +477,11 @@ const MATCHES=[
 {id:31,g:"F",md:1,date:"Jun 14",s:14,time:"4:00 PM",    home:"NED",away:"JPN", venue:"AT&T Stadium, Arlington"},
 {id:32,g:"F",md:1,date:"Jun 14",s:14,time:"10:00 PM",   home:"SWE",away:"TUN", venue:"Estadio Akron, Guadalajara"},
 {id:33,g:"F",md:2,date:"Jun 20",s:20,time:"1:00 PM",    home:"NED",away:"SWE", venue:"NRG Stadium, Houston"},
-{id:34,g:"F",md:2,date:"Jun 20",s:20,time:"Midnight",   home:"TUN",away:"JPN", venue:"Estadio Akron, Guadalajara"},
+{id:34,g:"F",md:2,date:"Jun 21",s:21,time:"Midnight",   home:"TUN",away:"JPN", venue:"Estadio Akron, Guadalajara"},
 {id:35,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"NED",away:"TUN", venue:"TBD",                           sim:true,est:true},
 {id:36,g:"F",md:3,date:"Jun 26",s:26,time:"~est.",      home:"SWE",away:"JPN", venue:"TBD",                           sim:true,est:true},
-{id:37,g:"G",md:1,date:"Jun 15",s:15,time:"6:00 PM",    home:"BEL",away:"EGY", venue:"Lumen Field, Seattle"},
-{id:38,g:"G",md:1,date:"Jun 15",s:15,time:"Midnight",   home:"IRN",away:"NZL", venue:"SoFi Stadium, Los Angeles"},
+{id:37,g:"G",md:1,date:"Jun 15",s:15,time:"3:00 PM",    home:"BEL",away:"EGY", venue:"Lumen Field, Seattle"},
+{id:38,g:"G",md:1,date:"Jun 15",s:15,time:"9:00 PM",    home:"IRN",away:"NZL", venue:"SoFi Stadium, Los Angeles"},
 {id:39,g:"G",md:2,date:"Jun 21",s:21,time:"3:00 PM",    home:"BEL",away:"IRN", venue:"SoFi Stadium, Los Angeles"},
 {id:40,g:"G",md:2,date:"Jun 21",s:21,time:"9:00 PM",    home:"NZL",away:"EGY", venue:"BC Place, Vancouver"},
 {id:41,g:"G",md:3,date:"Jun 26",s:26,time:"~est.",      home:"BEL",away:"NZL", venue:"TBD",                           sim:true,est:true},
@@ -497,12 +504,12 @@ const MATCHES=[
 {id:58,g:"J",md:2,date:"Jun 22",s:22,time:"11:00 PM",   home:"JOR",away:"ALG", venue:"Levi's Stadium, Santa Clara"},
 {id:59,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ARG",away:"JOR", venue:"TBD",                           sim:true,est:true},
 {id:60,g:"J",md:3,date:"Jun 27",s:27,time:"~est.",      home:"ALG",away:"AUT", venue:"TBD",                           sim:true,est:true},
-{id:61,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"POR",away:"COL", venue:"TBD",                           est:true},
-{id:62,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"COD",away:"UZB", venue:"TBD",                           est:true},
-{id:63,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"POR",away:"COD", venue:"TBD",                           est:true},
-{id:64,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"UZB",away:"COL", venue:"TBD",                           est:true},
-{id:65,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"COL",away:"COD", venue:"TBD",                           sim:true,est:true},
-{id:66,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"UZB",away:"POR", venue:"TBD",                           sim:true,est:true},
+{id:61,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"POR",away:"COD", venue:"TBD",                           est:true},
+{id:62,g:"K",md:1,date:"Jun 17",s:17,time:"~est.",      home:"UZB",away:"COL", venue:"TBD",                           est:true},
+{id:63,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"POR",away:"UZB", venue:"TBD",                           est:true},
+{id:64,g:"K",md:2,date:"Jun 23",s:23,time:"~est.",      home:"COL",away:"COD", venue:"TBD",                           est:true},
+{id:65,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"COL",away:"POR", venue:"TBD",                           sim:true,est:true},
+{id:66,g:"K",md:3,date:"Jun 27",s:27,time:"~est.",      home:"COD",away:"UZB", venue:"TBD",                           sim:true,est:true},
 {id:67,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"ENG",away:"CRO", venue:"TBD",                           est:true},
 {id:68,g:"L",md:1,date:"Jun 17",s:17,time:"~est.",      home:"GHA",away:"PAN", venue:"TBD",                           est:true},
 {id:69,g:"L",md:2,date:"Jun 23",s:23,time:"~est.",      home:"ENG",away:"GHA", venue:"TBD",                           est:true},
@@ -548,17 +555,19 @@ function timeAgo(iso){
 }
 
 function updateFreshness(){
-  const el = document.getElementById("live-status");
-  if(!el) return;
-  if(!LIVE || !LIVE.fetched_at){ el.innerHTML=""; return; }
+  // The pill renders wherever freshness matters: the Schedule tab and the Live Points view.
+  const els=[document.getElementById("live-status"),document.getElementById("points-freshness")].filter(Boolean);
+  if(!els.length) return;
+  if(!LIVE || !LIVE.fetched_at){ els.forEach(el=>el.innerHTML=""); return; }
   const ageMin = (Date.now() - Date.parse(LIVE.fetched_at))/60000;
-  const liveNow = Object.values(LIVE.byKey).some(m=>m.status==="live");
+  // live anywhere — group OR knockout
+  const liveNow = [...Object.values(LIVE.byKey), ...(LIVE.knockouts||[])].some(m=>m.status==="live");
   const stale = ageMin > 10;
   const cls = "live-pill" + (liveNow ? " livenow" : "") + (stale ? " stale" : "");
   const label = liveNow
     ? (stale ? "Live — scores may be delayed" : "Live now")
     : "Scores updated "+timeAgo(LIVE.fetched_at);
-  el.innerHTML = `<span class="${cls}"><span class="live-dot"></span>${esc(label)}</span>`;
+  els.forEach(el=>{ el.innerHTML = `<span class="${cls}" title="source: ${esc(LIVE.source||"")}"><span class="live-dot"></span>${esc(label)}</span>`; });
 }
 
 // ─── SELECTION ────────────────────────────────────────────────────────────────
@@ -619,12 +628,19 @@ function applyPersonSelection(name, save=true){
   });
 
   applyFilters();
-  closeModal();
+  // Close the picker only on an explicit user choice (save=true). This function is also
+  // reused as a re-render hook by the 60s live poll (save=false) — that path must never
+  // slam the modal shut while someone is choosing their name.
+  if(save) closeModal();
 }
 
 function clearSelection(){ applyPersonSelection(null); }
 
-function openModal(){ document.getElementById("modal").style.display="flex"; }
+function openModal(){
+  document.getElementById("modal").style.display="flex";
+  const box=document.querySelector("#modal .modal-box");
+  if(box&&box.focus) box.focus();   // move keyboard focus into the dialog
+}
 function closeModal(){ document.getElementById("modal").style.display="none"; }
 
 // ─── RANKINGS ─────────────────────────────────────────────────────────────────
@@ -658,7 +674,9 @@ function buildRankings(){
 }
 
 // ─── STANDINGS (live points from match outcomes) ────────────────────────────────
-// Group points per team from completed matches in the live feed: win 3, draw 1, loss 0.
+// Match points per team from completed games: win 3, draw 1, loss 0. Knockout games can't
+// end drawn — a level score there is decided on penalties (winner gets the 3); if the feed
+// hasn't supplied penalty scores yet, no points are awarded rather than faking a draw.
 function computeTeamPoints(){
   const team={}; Object.keys(TEAMS).forEach(id=>team[id]={p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});
   const games=[];
@@ -668,9 +686,17 @@ function computeTeamPoints(){
     if(m.status!=="completed"||m.home_score==null||m.away_score==null) return;
     const h=m.home_id, a=m.away_id; if(!team[h]||!team[a]) return;
     const hs=+m.home_score, as=+m.away_score;
+    const isKO=!!m.round && m.round!=="group";
     team[h].p++; team[a].p++; team[h].gf+=hs; team[h].ga+=as; team[a].gf+=as; team[a].ga+=hs;
     if(hs>as){ team[h].w++; team[h].pts+=3; team[a].l++; }
     else if(as>hs){ team[a].w++; team[a].pts+=3; team[h].l++; }
+    else if(isKO){
+      const hp=m.home_pen, ap=m.away_pen;
+      if(hp!=null&&ap!=null&&+hp!==+ap){
+        if(+hp>+ap){ team[h].w++; team[h].pts+=3; team[a].l++; }
+        else { team[a].w++; team[a].pts+=3; team[h].l++; }
+      } // else: shoot-out result unknown — award nothing until the feed says
+    }
     else { team[h].d++; team[a].d++; team[h].pts++; team[a].pts++; }
   });
   return team;
@@ -683,10 +709,12 @@ function buildStandings(){
     const played=tp[t1].p+tp[t2].p;
     const gd=(tp[t1].gf-tp[t1].ga)+(tp[t2].gf-tp[t2].ga);
     return {name:p.name,color:p.color,t1,t2,a:tp[t1],b:tp[t2],pts:tp[t1].pts+tp[t2].pts,played,gd};
-  }).sort((x,y)=> y.pts-x.pts || y.gd-x.gd || y.played-x.played || x.name.localeCompare(y.name));
+  // Tie-break: points, then goal difference, then FEWER games played (same haul from
+  // fewer games is the stronger position), then name for stability.
+  }).sort((x,y)=> y.pts-x.pts || y.gd-x.gd || x.played-y.played || x.name.localeCompare(y.name));
   const anyPlayed=rows.some(r=>r.played>0);
   const maxPts=Math.max(1,...rows.map(r=>r.pts));
-  const team=(id,t)=>`${esc(teamName(id))} <span style="color:#475569">${t.w}-${t.d}-${t.l}</span> <b style="color:#cbd5e1">${t.pts}</b>`;
+  const team=(id,t)=>`${esc(teamName(id))} <span style="color:#64748b">${t.w}-${t.d}-${t.l}</span> <b style="color:#cbd5e1">${t.pts}</b>`;
   let html = anyPlayed ? "" : `<p class="sched-note">No completed matches yet — points will appear here as games finish.</p>`;
   html += rows.map((r,i)=>{
     const top=i<3&&r.pts>0?"top":"";
@@ -711,17 +739,27 @@ const ROUND_ORDER=["r32","r16","qf","sf","third","final"];
 function bteam(id,m,side){
   if(!id) return `<div class="bteam tbd"><span class="bteam-name">TBD</span></div>`;
   const o=own(id), c=col(id);
-  const hs=m.home_score, as=m.away_score;
-  const win=m.status==="completed"&&hs!=null&&as!=null&&((side==="home"&&hs>as)||(side==="away"&&as>hs));
-  return `<div class="bteam${win?" winner":""}" data-team="${id}" style="border-left-color:${c||"transparent"}">
+  const hs=m.home_score!=null?+m.home_score:null, as=m.away_score!=null?+m.away_score:null;
+  const hp=m.home_pen!=null?+m.home_pen:null, ap=m.away_pen!=null?+m.away_pen:null;
+  // winner on the night: by score, or by penalty shoot-out when level
+  let win=false;
+  if(m.status==="completed"&&hs!=null&&as!=null){
+    if(hs!==as) win=(side==="home")===(hs>as);
+    else if(hp!=null&&ap!=null&&hp!==ap) win=(side==="home")===(hp>ap);
+  }
+  return `<div class="bteam${win?" winner":""}" data-team="${esc(id)}" style="border-left-color:${c||"transparent"}">
     <span class="bteam-name">${esc(teamName(id))}</span>
     ${o?`<span class="bteam-own" style="color:${c}">${esc(o)}</span>`:""}
   </div>`;
 }
 function bracketMatch(m){
   let sc="";
-  if(m.status==="live") sc=`<div class="bscore">${m.home_score??0}–${m.away_score??0} <span class="lv">LIVE</span></div>`;
-  else if(m.status==="completed"&&m.home_score!=null) sc=`<div class="bscore">${m.home_score}–${m.away_score}</div>`;
+  const hs=m.home_score!=null?+m.home_score:null, as=m.away_score!=null?+m.away_score:null;
+  if(m.status==="live") sc=`<div class="bscore">${hs??0}–${as??0} <span class="lv">LIVE</span></div>`;
+  else if(m.status==="completed"&&hs!=null){
+    const pens=(hs===as&&m.home_pen!=null&&m.away_pen!=null)?` <span class="pens">(${+m.home_pen}–${+m.away_pen} pens)</span>`:"";
+    sc=`<div class="bscore">${hs}–${as}${pens}</div>`;
+  }
   return `<div class="bmatch">${bteam(m.home_id,m,"home")}${bteam(m.away_id,m,"away")}${sc}</div>`;
 }
 function buildBracket(){
@@ -763,15 +801,38 @@ function buildSchedule(){
   const dayFmt =new Intl.DateTimeFormat("en-US",{timeZone:zone,weekday:"short",month:"short",day:"numeric"});  // header label
   const timeFmt=new Intl.DateTimeFormat("en-US",{timeZone:zone,hour:"numeric",minute:"2-digit",timeZoneName:"short"});
 
-  // Build a display row per match, localized to the selected zone.
-  const rows=MATCHES.map(m=>{
-    const dt=matchInstant(m);
-    if(dt){
-      return {m,dt,dateKey:keyFmt.format(dt),dateLabel:dayFmt.format(dt),timeLabel:timeFmt.format(dt),sortT:dt.getTime()};
-    }
-    // Unknown time (~est.): keep its ET calendar day and sort after timed games.
-    return {m,dt:null,dateKey:`${SEASON_YEAR}-06-${String(m.s).padStart(2,"0")}`,dateLabel:m.date,timeLabel:"~est.",sortT:Number.MAX_SAFE_INTEGER};
-  });
+  // One display row per match, localized to the selected zone.
+  function rowFor(m,dt,lv){
+    if(dt) return {m,lv,dt,dateKey:keyFmt.format(dt),dateLabel:dayFmt.format(dt),timeLabel:timeFmt.format(dt),sortT:dt.getTime()};
+    // No instant known: bucket/label on its ET calendar day (noon ET keeps the label's
+    // weekday consistent with real rows in every offered zone); sort after timed games.
+    const approx=new Date(Date.UTC(SEASON_YEAR,5,m.s,16,0));
+    return {m,lv,dt:null,dateKey:keyFmt.format(approx),dateLabel:dayFmt.format(approx),timeLabel:"~est.",sortT:Number.MAX_SAFE_INTEGER};
+  }
+
+  // FEED-FIRST: once the pipeline covers the group stage, the feed IS the schedule —
+  // authoritative pairings + stadium-resolved kickoff instants. The hand-entered MATCHES
+  // table is only a venue lookup + bootstrap fallback (first paint / feed outage). This is
+  // what corrects estimated pairings (e.g. Group K) and times automatically.
+  const staticByKey={}; MATCHES.forEach(m=>staticByKey[matchKey(m.home,m.away,m.g)]=m);
+  const feed=LIVE&&LIVE.byKey?Object.values(LIVE.byKey):[];
+  let rows;
+  if(feed.length>=60){
+    rows=feed.map(lv=>{
+      const sm=staticByKey[matchKey(lv.home_id,lv.away_id,lv.group)];
+      const dt=lv.kickoff_utc?new Date(lv.kickoff_utc):(sm?matchInstant(sm):null);
+      const m={id:lv.match_number||0, g:lv.group, home:lv.home_id, away:lv.away_id,
+               venue:sm?sm.venue:"TBD", sim:false, est:!lv.kickoff_utc&&(!sm||!!sm.est),
+               s:sm?sm.s:27}; // s only matters for the no-instant fallback bucket
+      return rowFor(m,dt,lv);
+    });
+    // simultaneous = same group kicking off at the same instant (matchday 3 pairs)
+    const simCount={};
+    rows.forEach(r=>{ if(r.dt){ const k=r.m.g+"@"+r.sortT; simCount[k]=(simCount[k]||0)+1; } });
+    rows.forEach(r=>{ if(r.dt&&simCount[r.m.g+"@"+r.sortT]>1) r.m.sim=true; });
+  } else {
+    rows=MATCHES.map(m=>rowFor(m, matchInstant(m), LIVE&&LIVE.byKey?LIVE.byKey[matchKey(m.home,m.away,m.g)]:null));
+  }
 
   // Group by local date, order days chronologically, order matches within a day by instant.
   const groups={};
@@ -782,25 +843,25 @@ function buildSchedule(){
     const g=groups[key];
     g.items.sort((a,b)=> a.sortT-b.sortT || a.m.id-b.m.id);
     html+=`<div class="date-group"><div class="date-label">${esc(g.label)}</div>`;
-    g.items.forEach(({m,timeLabel})=>{
+    g.items.forEach(({m,lv,timeLabel})=>{
       const ho=own(m.home)||"", ao=own(m.away)||"";
       const isCivil = !!ho && ho===ao;   // both teams owned by the same participant
 
-      // Live overlay (if data/matches.json loaded). Scores re-oriented to our home/away.
-      const lv = LIVE && LIVE.byKey[matchKey(m.home,m.away,m.g)];
+      // Live overlay. Scores re-oriented to our home/away.
       let center=`vs`, statusHtml="";
       if(lv && lv.status && lv.status!=="scheduled" && lv.home_score!=null && lv.away_score!=null){
-        let hs=lv.home_score, as=lv.away_score;
-        if(lv.home_id && lv.home_id!==m.home){ const t=hs; hs=as; as=t; }
-        center=`<span class="score">${hs}–${as}</span>`;
+        let hs=+lv.home_score, as=+lv.away_score, hp=lv.home_pen, ap=lv.away_pen;
+        if(lv.home_id && lv.home_id!==m.home){ let t=hs; hs=as; as=t; t=hp; hp=ap; ap=t; }
+        const pens=(lv.status==="completed"&&hs===as&&hp!=null&&ap!=null)?` <span class="pens">(${+hp}–${+ap} p)</span>`:"";
+        center=`<span class="score">${hs}–${as}${pens}</span>`;
         if(lv.status==="live") statusHtml=`<div class="mstatus live">LIVE${lv.minute?" "+esc(String(lv.minute))+"'":""}</div>`;
         else if(lv.status==="completed") statusHtml=`<div class="mstatus ft">FULL TIME</div>`;
       }
 
       let cls="match-card";
       if(isCivil) cls+=" civil-war";
-      html+=`<div class="${cls}" data-group="${m.g}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
-        <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${m.g}</div>
+      html+=`<div class="${cls}" data-group="${esc(m.g)}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
+        <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${esc(m.g)}</div>
         <div class="team-side">
           ${ownerTag(m.home)}
           <div class="team-name">${esc(teamName(m.home))}</div>
@@ -815,7 +876,7 @@ function buildSchedule(){
           ${statusHtml||`<div class="time">${esc(timeLabel)}</div>`}
           ${m.sim?`<div class="sim-badge">SIMULTANEOUS</div>`:""}
           ${m.est?`<div class="est-badge">~estimated</div>`:""}
-          <div style="font-size:9px;color:#253550;margin-top:1px">${m.venue!=="TBD"?esc(m.venue.split(",")[0]):""}</div>
+          <div style="font-size:9px;color:#3d5270;margin-top:1px">${m.venue!=="TBD"?esc(m.venue.split(",")[0]):""}</div>
         </div>
       </div>`;
     });
@@ -881,7 +942,7 @@ function buildGroups(){
           ${cw?`<span class="civil-marker"><i data-lucide="zap"></i></span>`:""}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:10px;color:#253550">${p.toFixed(2)}%</span>
+          <span style="font-size:10px;color:#3d5270">${p.toFixed(2)}%</span>
           ${o?`<span class="owner-tag" style="background:${bg(id)};color:${col(id)}">${esc(o)}</span>`
              :`<span class="owner-tag none">unclaimed</span>`}
         </div>
@@ -947,24 +1008,44 @@ buildCivilNote();
 buildSchedule();
 buildGroups();
 buildModal();
-drawIcons(); // convert the static header/tab/pill icons (CDN script loads before this)
+drawIcons(); // no-op until the deferred Lucide script lands; the load hook below re-runs it
+if(typeof window!=="undefined") window.addEventListener("load", drawIcons);
 
-// Keyboard: Enter/Space opens the person picker from the pill, Escape closes the modal.
+// Keyboard: Enter/Space opens the picker (pill) and clears (✕); Escape closes the modal.
 document.getElementById("person-pill").addEventListener("keydown",e=>{
   if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openModal(); }
 });
+document.getElementById("person-pill-clear").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key===" "){ e.preventDefault(); e.stopPropagation(); clearSelection(); }
+});
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+// Tablists: ←/→ move focus and activate (ARIA tabs pattern), for both the main bar and sub-tabs.
+document.querySelectorAll('[role="tablist"]').forEach(bar=>{
+  bar.addEventListener("keydown",e=>{
+    if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight") return;
+    const tabs=[...bar.querySelectorAll('[role="tab"]')];
+    const i=tabs.indexOf(document.activeElement);
+    if(i<0) return;
+    e.preventDefault();
+    const next=tabs[(i+(e.key==="ArrowRight"?1:tabs.length-1))%tabs.length];
+    next.focus(); next.click();
+  });
+});
 
 // Restore saved selection
 try{
   const saved=localStorage.getItem("wc-pool-person");
   if(saved&&PMAP[saved]) applyPersonSelection(saved, false);
 }catch(e){}
+// Honor whatever the filter selects show (browsers can restore them across reload).
+applyFilters();
 
 // Live scores: load once, then refresh every 60s while the tab is visible.
-// No-ops gracefully if data/matches.json doesn't exist yet.
+// updateFreshness runs on every tick too, so the pill keeps aging (and flips to "stale")
+// even when the fetch itself starts failing.
 loadLive();
-setInterval(()=>{ if(!document.hidden) loadLive(); }, 60000);
+setInterval(()=>{ if(!document.hidden){ loadLive(); updateFreshness(); } }, 60000);
 </script>
 </body>
 </html>

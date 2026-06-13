@@ -1,8 +1,9 @@
 name: Build, refresh & deploy
 
 # Two triggers, one job:
-#   • push to main / manual  → just rebuild & deploy the site (e.g. after a code change)
-#   • schedule (every 5 min) → refresh live data during match windows, then deploy
+#   • push to main / manual  → always rebuild & deploy the site (e.g. after a code change)
+#   • schedule (every 5 min, Jun–Jul) → refresh live data during the tournament window;
+#     deploy ONLY if the data actually changed (skips ~288 no-op deploys/day otherwise)
 #
 # Pages is published from THIS workflow (set Settings → Pages → Source: GitHub Actions).
 # That sidesteps both the ~10-builds/hour cap (exempt for custom Actions) and the fact
@@ -12,7 +13,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "*/5 * * * *"   # GitHub's minimum; expect 5–30 min drift at busy times
+    - cron: "*/5 * * 6,7 *"   # June+July only (schedule.js gates finer); 5 min is GitHub's floor, expect drift
   workflow_dispatch:
 
 permissions:
@@ -40,7 +41,10 @@ jobs:
       - name: Live-window guard
         id: guard
         if: github.event_name != 'push'
-        run: echo "active=$(node scripts/schedule.js)" >> "$GITHUB_OUTPUT"
+        run: |
+          # don't let echo mask a guard crash — a silent failure here would disable refresh forever
+          active=$(node scripts/schedule.js) || { echo "::error::schedule.js failed"; exit 1; }
+          echo "active=$active" >> "$GITHUB_OUTPUT"
 
       - name: Refresh match data
         if: github.event_name != 'push' && steps.guard.outputs.active == 'true'
@@ -48,6 +52,7 @@ jobs:
         run: node scripts/refresh.js
 
       - name: Commit data if it changed
+        id: commit
         if: github.event_name != 'push'
         run: |
           git config user.name  'github-actions[bot]'
@@ -58,23 +63,33 @@ jobs:
             for i in 1 2 3; do
               git push && break || { echo "push failed, rebasing…"; git pull --rebase --autostash origin "${GITHUB_REF_NAME}"; sleep $((2**i)); }
             done
+            # the retry loop can end on a successful sleep — make total failure loud, not silent
+            git push || { echo "::error::push failed after retries — not deploying unpushed data"; exit 1; }
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "no data change"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
       # ── Build & deploy ──
+      # Scheduled runs deploy only when the data actually changed; pushes & manual runs always deploy.
       - name: Validate canonical data
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         run: node scripts/check-data.js
 
       - name: Assemble site
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         run: |
           rm -rf _site && mkdir _site
           cp index.html _site/
           cp -r data _site/data
 
       - uses: actions/configure-pages@v5
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         with:
           path: _site
       - id: deploy
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         uses: actions/deploy-pages@v4
