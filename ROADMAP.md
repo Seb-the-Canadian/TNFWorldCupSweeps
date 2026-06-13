@@ -56,10 +56,12 @@ slugs B–L.
 ## Backlog (ideas — reorder/cut as you like)
 
 - **Live results & standings** *(→ Epic Phase B)* — scores per match; group tables; who's advancing.
-- **Knockout bracket** — once groups finish, a Round-of-32 → Final bracket coloured by
-  owner, with a running "who's still alive" count per participant.
-- **Points / leaderboard scoring** — define a scoring system (e.g. points per win,
-  bonus for stage reached) and rank participants by points earned, not just pre-tournament odds.
+- [x] **Points / leaderboard scoring** ✅ — "Standings" tab (now the default landing view):
+  each participant ranked by the sum of their two teams' match points (win 3 / draw 1 /
+  loss 0), computed live from `matches.json` completed results. Odds moved to a secondary tab.
+- **Knockout bracket** *(next — has content from Jun 27)* — Round-of-32 → Final bracket
+  coloured by owner, fed by the knockout `type` rows once teams are set; a running
+  "who's still alive" count per participant. Pairs with the Standings tab.
 - **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers, history chart.
 - **"Today" view** — collapse the schedule to just today's (or the next) matches.
 - **Share / deep links** — URL params so `?me=Seb&tz=Europe/London` opens pre-configured.
