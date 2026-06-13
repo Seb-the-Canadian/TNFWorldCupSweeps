@@ -59,9 +59,10 @@ slugs B–L.
 - [x] **Points / leaderboard scoring** ✅ — "Standings" tab (now the default landing view):
   each participant ranked by the sum of their two teams' match points (win 3 / draw 1 /
   loss 0), computed live from `matches.json` completed results. Odds moved to a secondary tab.
-- **Knockout bracket** *(next — has content from Jun 27)* — Round-of-32 → Final bracket
-  coloured by owner, fed by the knockout `type` rows once teams are set; a running
-  "who's still alive" count per participant. Pairs with the Standings tab.
+- [x] **Knockout bracket** ✅ — "Bracket" tab: Round-of-32 → Final (+ third place) rounds
+  coloured by owner, fed by the knockout rows from the feed. Shows TBD slots now and fills
+  in automatically once the draw resolves (Jun 27); completed knockout results count toward
+  the Standings points. Future polish: connector lines and a "still alive per participant" tally.
 - **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers, history chart.
 - **"Today" view** — collapse the schedule to just today's (or the next) matches.
 - **Share / deep links** — URL params so `?me=Seb&tz=Europe/London` opens pre-configured.

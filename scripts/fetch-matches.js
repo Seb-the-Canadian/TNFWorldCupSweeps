@@ -84,6 +84,7 @@ function normalizeMatch(raw, ctx) {
     group: parseGroup(pick(raw, ["group", "group_name", "groupName"])),
     matchday: numOrNull(pick(raw, ["matchday", "round", "match_day", "week"])),
     match_number: numOrNull(pick(raw, ["id", "match_number", "number", "matchId"])),
+    round: String(pick(raw, ["type", "stage", "round_type"]) ?? "").toLowerCase() || null, // "group" | "r32" | "r16" | "qf" | "sf" | "third" | "final"
     kickoff_utc: null,                                              // local_date is venue-local; the UI uses our own ET schedule for times
     kickoff_local: pick(raw, ["local_date", "date", "datetime", "kickoff"]) || null,
     home_id: join(homeUid, homeName),
@@ -113,24 +114,28 @@ async function fetchMatches(gamesUrl = GAMES_URL, teamsUrl = TEAMS_URL) {
   const ctx = { idx, byId };
   const unresolved = [];
   const matches = [];
+  const knockouts = [];
   for (const raw of arr) {
-    const rtype = String(pick(raw, ["type", "stage", "round_type"]) ?? "").toLowerCase();
-    if (rtype && rtype !== "group") continue;   // skip knockouts (team_id:0 / TBD before the bracket)
     const m = normalizeMatch(raw, ctx);
-    if (!m.group) continue;                      // belt-and-suspenders for any untyped non-group row
+    if (m.round && m.round !== "group") {        // knockout: teams are TBD (id 0) until the draw — keep with nulls
+      delete m._raw;
+      knockouts.push(m);
+      continue;
+    }
+    if (!m.group) continue;                      // skip any untyped non-group row
     if (!m.home_id || !m.away_id) { unresolved.push(JSON.stringify(m._raw)); continue; }
     delete m._raw;
     matches.push(m);
   }
   if (unresolved.length) {
     throw new Error(
-      `Unresolved teams (${unresolved.length}); upstream id→fifa map size=${byId.size}.\n  ` +
+      `Unresolved GROUP teams (${unresolved.length}); upstream id→fifa map size=${byId.size}.\n  ` +
       unresolved.slice(0, 5).join("\n  ") +
       `\nFirst raw game: ` + JSON.stringify(arr[0]).slice(0, 600));
   }
   if (!matches.length) throw new Error("0 group matches after filtering; first raw game: " + JSON.stringify(arr[0]).slice(0, 600));
   if (matches.length < 72) console.warn(`warning: ${matches.length} group matches resolved (expected 72)`);
-  return { source: "worldcup26.ir", fetched_at: new Date().toISOString(), matches };
+  return { source: "worldcup26.ir", fetched_at: new Date().toISOString(), matches, knockouts };
 }
 
 function selftest() {
@@ -160,9 +165,13 @@ function selftest() {
     if (m.status !== st) errs.push(`#${i} status ${m.status} != ${st}`);
     if (m.minute !== min) errs.push(`#${i} minute ${m.minute} != ${min}`);
   });
-  // knockout rows (type !== "group", team_id 0) are excluded in fetchMatches' loop by the `type` field
+  // knockout rows: normalized with a round + TBD (null) teams; fetchMatches routes them to `knockouts`
+  const ko = normalizeMatch({ id: 80, home_team_id: 0, away_team_id: 0, group: "", type: "r32", finished: false, time_elapsed: "notstarted" }, ctx);
+  if (ko.round !== "r32") errs.push(`knockout round ${ko.round} != r32`);
+  if (ko.home_id !== null || ko.away_id !== null) errs.push("knockout teams should be null (TBD)");
+  if (ko.status !== "scheduled") errs.push(`knockout status ${ko.status} != scheduled`);
   if (errs.length) { console.error("✗ selftest:\n  " + errs.join("\n  ")); process.exit(1); }
-  console.log("✓ fetch-matches selftest: fifa_code id-join + name fallback, status/minute/group/finished parsing all OK");
+  console.log("✓ fetch-matches selftest: id-join, name fallback, status/minute/finished, and knockout routing all OK");
 }
 
 module.exports = { fetchMatches, normalizeMatch, buildResolver, buildIdMap, resolveName, parseGroup, mapStatus };
