@@ -195,6 +195,16 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .bteam.winner .bteam-name{color:#fff}
 .bscore{text-align:center;font-size:11px;font-weight:800;color:#94a3b8;margin-top:3px}
 .bscore .lv{color:#fca5a5}
+
+/* Sub-tabs (Rankings page: Live Points / Odds) */
+.subtab-bar{display:inline-flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:14px}
+.subtab-btn{padding:6px 14px;font-size:12px;font-weight:700;color:var(--muted);background:none;border:none;border-radius:6px;cursor:pointer;transition:.12s all}
+.subtab-btn:hover{color:var(--text)}
+.subtab-btn.active{color:#0a1628;background:#60a5fa}
+.subview{display:none}
+.subview.active{display:block}
+.desc-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:10px 13px;font-size:11px;color:#94a3b8;line-height:1.6;margin-bottom:14px}
+.desc-box strong{color:#e2e8f0;font-weight:700}
 </style>
 </head>
 <body>
@@ -226,25 +236,29 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <div class="tab-bar" role="tablist">
-  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('standings',this)"><i data-lucide="award"></i>Standings</button>
+  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('rankings',this)"><i data-lucide="award"></i>Rankings</button>
   <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('bracket',this)"><i data-lucide="git-fork"></i>Bracket</button>
   <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('schedule',this)"><i data-lucide="calendar"></i>Schedule</button>
   <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('groups',this)"><i data-lucide="layout-grid"></i>Groups</button>
-  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('rankings',this)"><i data-lucide="percent"></i>Odds</button>
 </div>
 
-<div id="tab-standings" class="tab-content active" role="tabpanel">
-  <p class="rankings-note">Live pool standings — each participant's total is the sum of their two teams' match points (<strong>win 3, draw 1, loss 0</strong>) from completed matches, updating as results come in. The knockout bracket arrives once the group stage finishes (Jun 27).</p>
-  <div id="standings-list"></div>
+<div id="tab-rankings" class="tab-content active" role="tabpanel">
+  <div class="subtab-bar" role="tablist">
+    <button class="subtab-btn active" role="tab" aria-selected="true" onclick="switchSub('points',this)">Live Points</button>
+    <button class="subtab-btn" role="tab" aria-selected="false" onclick="switchSub('odds',this)">Pre-Tournament Odds</button>
+  </div>
+  <div id="sub-points" class="subview active">
+    <div class="desc-box"><strong>Live Points</strong> — each participant's score is the running sum of their two teams' match points: <strong>win 3, draw 1, loss 0</strong>, from completed matches (group stage now, knockouts later). Updates automatically as results come in.</div>
+    <div id="standings-list"></div>
+  </div>
+  <div id="sub-odds" class="subview">
+    <div class="desc-box"><strong>Pre-Tournament Odds</strong> — each participant's combined outright tournament-winner probability, from blended pre-tournament sportsbook odds (FanDuel / Fox / NBC / CBS). A fixed pre-tournament snapshot for comparison — it doesn't change with live results.</div>
+    <div id="rankings-list"></div>
+  </div>
 </div>
 
 <div id="tab-bracket" class="tab-content" role="tabpanel">
   <div id="bracket-list"></div>
-</div>
-
-<div id="tab-rankings" class="tab-content" role="tabpanel">
-  <p class="rankings-note">Combined outright tournament-winner probability per participant (blended pre-tournament sportsbook odds, FanDuel / Fox / NBC / CBS). Bookmaker margin not removed — used for relative ranking only.</p>
-  <div id="rankings-list"></div>
 </div>
 
 <div id="tab-schedule" class="tab-content" role="tabpanel">
@@ -905,6 +919,15 @@ function switchTab(name,btn){
   document.querySelectorAll(".tab-content").forEach(el=>el.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(el=>{el.classList.remove("active");el.setAttribute("aria-selected","false");});
   document.getElementById("tab-"+name).classList.add("active");
+  btn.classList.add("active");
+  btn.setAttribute("aria-selected","true");
+}
+
+// Sub-tabs within the Rankings page: "points" (live) vs "odds" (pre-tournament).
+function switchSub(name,btn){
+  document.querySelectorAll("#tab-rankings .subview").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll("#tab-rankings .subtab-btn").forEach(el=>{el.classList.remove("active");el.setAttribute("aria-selected","false");});
+  document.getElementById("sub-"+name).classList.add("active");
   btn.classList.add("active");
   btn.setAttribute("aria-selected","true");
 }
