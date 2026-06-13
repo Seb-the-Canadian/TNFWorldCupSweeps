@@ -17,9 +17,11 @@ const fs = require("fs");
 const path = require("path");
 
 const OUT = path.join(__dirname, "..", "data/matches.json");
-// Group stage: first game Jun 11; last (midnight/west-coast) games run into early Jun 28 UTC.
+// Whole tournament: first game Jun 11; the final is Jul 19 (allow for ET/pens overrun into
+// early Jul 20 UTC). The Bracket and Standings depend on knockout results, so the window
+// must cover the knockout phase too — not just the group stage.
 const START = Date.parse("2026-06-11T00:00:00Z");
-const END = Date.parse("2026-06-28T06:00:00Z");
+const END = Date.parse("2026-07-20T06:00:00Z");
 
 function active() {
   let data;
@@ -28,7 +30,8 @@ function active() {
 
   const now = Date.now();
   if (now >= START && now <= END) return true;
-  return (data.matches || []).some((m) => m.status === "live");
+  // Outside the window, only keep refreshing if something is still marked live (group or knockout).
+  return [...(data.matches || []), ...(data.knockouts || [])].some((m) => m.status === "live");
 }
 
 process.stdout.write(active() ? "true" : "false");

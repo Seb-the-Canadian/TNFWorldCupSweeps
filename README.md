@@ -1,21 +1,25 @@
-# TNF World Cup Sweeps
+# TNFifa World Cup 2026 Sweepstakes
 
-A single-file dashboard for tracking our 2026 World Cup sweepstakes pool — rankings,
-schedule, and group ownership for 24 participants. No build step, no dependencies.
+A single-file dashboard for tracking our 2026 World Cup sweepstakes pool — live points,
+schedule, bracket, and group ownership for 24 participants. No build step, no framework.
 
-**Live site:** once GitHub Pages is enabled (see below), the dashboard is served at
-`https://seb-the-canadian.github.io/tnfworldcupsweeps/`.
+**Live site:** https://seb-the-canadian.github.io/TNFWorldCupSweeps/
 
 ## How it works
 
-Everything lives in [`index.html`](index.html). Open it in any browser and it just runs.
+Everything lives in [`index.html`](index.html), served by GitHub Pages; live data is
+committed to `data/` by a scheduled GitHub Action.
 
-- **🏆 Rankings** — participants ranked by combined outright tournament-winner
-  probability (blended pre-tournament sportsbook odds). Margin not removed; used for
-  relative ranking only.
-- **📅 Schedule** — all 72 group-stage matches, grouped by day and sorted by kickoff
-  time, with owner tags. Filter by group, "My Matches", pool battles, or civil wars.
-- **🗂 Groups** — who owns which team in each group, sorted by win probability.
+- **Rankings** — two sub-views with a description box each: **Live Points** (default —
+  each participant's running sum of their two teams' match points, win 3 / draw 1 /
+  loss 0; knockout shoot-out wins count as wins) and **Pre-Tournament Odds** (combined
+  outright-winner probability from blended sportsbook odds; a fixed snapshot).
+- **Bracket** — Round-of-32 → Final, owner-coloured; slots show TBD until the group
+  stage resolves (Jun 27) and then fill in automatically, including penalty results.
+- **Schedule** — all 72 group matches with live scores, grouped by day in your time
+  zone. Feed-first: pairings and kickoff times come from the live feed when available.
+  Filter by group, "My Matches", pool battles, or civil wars.
+- **Groups** — who owns which team in each group, sorted by win probability.
 
 Pick your name (top-right) to highlight your teams and matches across every tab, and
 choose a **time zone** to show every kickoff in your own local time (auto-detected by
@@ -33,21 +37,24 @@ automated data commits use `GITHUB_TOKEN`, which does **not** trigger the classi
 
 The site is served at `https://seb-the-canadian.github.io/tnfworldcupsweeps/`.
 
-## Live data pipeline (Phase B)
+## Live data pipeline
 
-When `data/matches.json` is present, the dashboard overlays live scores and match status
-onto the Schedule tab and shows a freshness indicator; when it's absent it renders the
-static schedule unchanged. The file is produced by GitHub Actions:
+`data/matches.json` (group games + a `knockouts` array) is produced by the
+[`site.yml`](.github/workflows/site.yml) Action and drives scores, points, and the
+bracket. When it's absent the dashboard falls back to its static schedule — no errors.
 
-- `scripts/fetch-matches.js` — fetches worldcup26.ir and resolves every team to its
-  canonical ID via `data/teams.json` aliases (fails loudly on an unresolved name).
-- `scripts/refresh.js` — writes `data/matches.json` only when scores change (or a match is
-  live), keeping commits/deploys minimal.
-- `scripts/schedule.js` — guards the 5-minute cron so it only works during match windows.
+- `scripts/fetch-matches.js` — fetches worldcup26.ir (`/get/games`, `/get/teams`,
+  `/get/stadiums`), joins teams by the feed's `fifa_code` validated against our canonical
+  IDs (name-alias fallback; fails loudly on an unresolved group team), computes true UTC
+  kickoff instants from venue-local times via a stadium→timezone map, and carries penalty
+  shoot-out scores for knockouts.
+- `scripts/refresh.js` — writes `data/matches.json` only when results change (or a match
+  is live), keeping commits/deploys minimal; scheduled runs deploy only on change.
+- `scripts/schedule.js` — guards the cron to the tournament window (Jun 11 – Jul 20 UTC).
 
-> First-run check: the upstream field names are mapped defensively but unverified. Watch the
-> first Actions run; if it errors on team resolution, add the missing alias to
-> `data/teams.json` (and run `npm test`).
+The upstream schema was verified against live payloads (2026-06-13). If the feed ever
+renames a team, the Action fails loudly with the raw sample — add the alias to
+`data/teams.json` and run `npm test`.
 
 ## Editing the data
 

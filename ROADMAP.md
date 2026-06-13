@@ -33,32 +33,28 @@ civil-war countdown, conviction signal). Phased to ship value early and de-risk 
       ID-keyed `TEAMS`/`POOL` model (groups, owners, and civil wars now *derived*, not
       hardcoded). `scripts/check-data.js` (`npm test`) guards inline↔JSON drift. Removes the
       biggest failure mode (three sources disagreeing on team-name strings).
-- [ ] **Phase B — Live scores & standings.** *In progress.*
-      - ✅ **Client live layer** (`index.html`): fetches `data/matches.json` (no-store, 60s
-        poll), overlays scores + LIVE/FULL-TIME status onto the schedule, shows a
-        freshness pill, and joins on team IDs (re-orienting scores). Zero regression —
-        renders the static schedule unchanged when no data file exists.
-      - ✅ **Pipeline scaffolding** (`scripts/`, `.github/workflows/site.yml`): worldcup26.ir
-        adapter (alias-resolved, fail-safe), refresh orchestrator (writes only on
-        change/live heartbeat), live-window guard, and inline Pages deploy with
-        concurrency + race-safe commits.
-      - ⏳ **Activate:** set Pages Source to *GitHub Actions* and merge to `main`; confirm
-        the upstream field names on the first real run (see "verify" below). Then add
-        standings → live group tables (Phase B-2).
+- [x] **Phase B — Live scores.** ✅ Shipped and verified end-to-end (2026-06-13): the
+      worldcup26.ir adapter (fifa_code join validated against canonical IDs, stadium-tz
+      kickoff instants, penalty scores, knockouts array), change-only refresh + deploy,
+      tournament-window guard (Jun 11 – Jul 20), and the client live layer (feed-first
+      schedule, scores/LIVE/FT overlay, freshness pill, 60s poll). Schema confirmed
+      against live payloads. *Remaining idea:* live group W/D/L tables on the Groups tab
+      (feed `/get/groups`).
 - [ ] **Phase C — Probabilities & analytics.** Polymarket Gamma adapter → `probabilities.json`
       + `pool-stats.json`; daily history snapshots; momentum, trajectory chart, conviction signal.
 
-**Verify before building** (couldn't confirm live — sandbox egress blocked the hosts):
-Gamma field names on a live `world-cup-winner` response; whether a per-team "to advance"
-market exists; worldcup26.ir's real team-name strings (via `/get/teams`); group-winner
-slugs B–L.
+**Verify before building Phase C:** Gamma field names on a live `world-cup-winner`
+response; whether a per-team "to advance" market exists; group-winner slugs B–L.
+(The worldcup26.ir items from the original list are now confirmed from live data.)
 
 ## Backlog (ideas — reorder/cut as you like)
 
-- **Live results & standings** *(→ Epic Phase B)* — scores per match; group tables; who's advancing.
-- [x] **Points / leaderboard scoring** ✅ — "Standings" tab (now the default landing view):
-  each participant ranked by the sum of their two teams' match points (win 3 / draw 1 /
-  loss 0), computed live from `matches.json` completed results. Odds moved to a secondary tab.
+- [x] **Live results** ✅ *(→ Epic Phase B)* — scores per match, live on the Schedule tab.
+  Live group W/D/L tables (feed `/get/groups`) remain a future idea.
+- [x] **Points / leaderboard scoring** ✅ — "Live Points" sub-view of the combined
+  **Rankings** page (the default landing view, with Pre-Tournament Odds as the second
+  sub-view): each participant ranked by the sum of their two teams' match points
+  (win 3 / draw 1 / loss 0; knockout shoot-out wins count as wins).
 - [x] **Knockout bracket** ✅ — "Bracket" tab: Round-of-32 → Final (+ third place) rounds
   coloured by owner, fed by the knockout rows from the feed. Shows TBD slots now and fills
   in automatically once the draw resolves (Jun 27); completed knockout results count toward
