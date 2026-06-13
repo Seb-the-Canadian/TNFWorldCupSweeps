@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-13T00:47:54.029Z",
+  "fetched_at": "2026-06-13T01:10:52.005Z",
   "matches": [
     {
       "group": "A",
@@ -49,7 +49,7 @@
       "kickoff_local": "06/12/2026 18:00",
       "home_id": "USA",
       "away_id": "PAR",
-      "status": "scheduled",
+      "status": "live",
       "home_score": 0,
       "away_score": 0,
       "minute": null
