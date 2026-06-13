@@ -64,12 +64,12 @@ function parseGroup(g) {
   return c ? c[0] : null;
 }
 
-// status from `finished` (wins) then `time_elapsed`
+// status from `finished` (wins) then `time_elapsed` (which can be "notstarted" | minutes | "finished")
 function mapStatus(raw) {
   const finished = pick(raw, ["finished", "is_finished", "completed"]);
-  if (/^(true|1|yes|ft)$/i.test(String(finished))) return "completed";
   const te = String(pick(raw, ["time_elapsed", "status", "state", "match_status"]) ?? "").trim().toLowerCase();
-  if (te === "" || /^(notstarted|not ?started|ns|scheduled|upcoming|0)$/.test(te)) return "scheduled";
+  if (/^(true|1|yes)$/i.test(String(finished)) || /(finish|full|ft|ended|aet|pen)/.test(te)) return "completed";
+  if (te === "" || /^(notstarted|not ?started|ns|scheduled|upcoming|tbd|0)$/.test(te)) return "scheduled";
   return "live";
 }
 const parseMinute = (te) => { const m = /(\d{1,3})/.exec(String(te == null ? "" : te)); return m ? Number(m[1]) : null; };
@@ -114,8 +114,10 @@ async function fetchMatches(gamesUrl = GAMES_URL, teamsUrl = TEAMS_URL) {
   const unresolved = [];
   const matches = [];
   for (const raw of arr) {
+    const rtype = String(pick(raw, ["type", "stage", "round_type"]) ?? "").toLowerCase();
+    if (rtype && rtype !== "group") continue;   // skip knockouts (team_id:0 / TBD before the bracket)
     const m = normalizeMatch(raw, ctx);
-    if (!m.group) continue; // group stage only (knockout teams are TBD pre-bracket)
+    if (!m.group) continue;                      // belt-and-suspenders for any untyped non-group row
     if (!m.home_id || !m.away_id) { unresolved.push(JSON.stringify(m._raw)); continue; }
     delete m._raw;
     matches.push(m);
@@ -141,16 +143,16 @@ function selftest() {
     { id: 3, home_team_id: 999, away_team_id: 998, home_team_name_en: "Korea Republic", away_team_name_en: "Czechia", group: "A", finished: "TRUE", time_elapsed: "FT", home_score: 1, away_score: 3 }, // id miss → name fallback
     { id: 4, home_team_id: 0, away_team_id: 0, home_team_name_en: "Cape Verde", away_team_name_en: "Spain", group: "H", finished: false, time_elapsed: "notstarted" },
     { id: 5, home_team_id: 0, away_team_id: 0, home_team_name_en: "Turkey", away_team_name_en: "Paraguay", group: "D", finished: false, time_elapsed: "" },
-    { id: 6, home_team_id: 0, away_team_id: 0, home_team_name_en: "England", away_team_name_en: "Croatia", group: "R32", type: "r32" }, // knockout → skipped via group
+    { id: 6, home_team_id: 0, away_team_id: 0, home_team_name_en: "England", away_team_name_en: "Croatia", group: "L", finished: false, time_elapsed: "finished" }, // completed via time_elapsed (no finished flag)
   ];
   const out = samples.map((s) => normalizeMatch(s, ctx));
   const expect = [
     ["MEX", "RSA", "A", "completed", 90], ["CIV", "ECU", "E", "live", 55],
     ["KOR", "CZE", "A", "completed", null], ["CPV", "ESP", "H", "scheduled", null],
-    ["TUR", "PAR", "D", "scheduled", null],
+    ["TUR", "PAR", "D", "scheduled", null], ["ENG", "CRO", "L", "completed", null],
   ];
   const errs = [];
-  out.slice(0, 5).forEach((m, i) => {
+  out.forEach((m, i) => {
     const [h, a, g, st, min] = expect[i];
     if (m.home_id !== h) errs.push(`#${i} home ${m.home_id} != ${h}`);
     if (m.away_id !== a) errs.push(`#${i} away ${m.away_id} != ${a}`);
@@ -158,9 +160,9 @@ function selftest() {
     if (m.status !== st) errs.push(`#${i} status ${m.status} != ${st}`);
     if (m.minute !== min) errs.push(`#${i} minute ${m.minute} != ${min}`);
   });
-  if (out[5].group !== null) errs.push(`#5 knockout group ${out[5].group} should parse to null (filtered out)`);
+  // knockout rows (type !== "group", team_id 0) are excluded in fetchMatches' loop by the `type` field
   if (errs.length) { console.error("✗ selftest:\n  " + errs.join("\n  ")); process.exit(1); }
-  console.log("✓ fetch-matches selftest: fifa_code id-join + name fallback, status/minute/group parsing all OK");
+  console.log("✓ fetch-matches selftest: fifa_code id-join + name fallback, status/minute/group/finished parsing all OK");
 }
 
 module.exports = { fetchMatches, normalizeMatch, buildResolver, buildIdMap, resolveName, parseGroup, mapStatus };
