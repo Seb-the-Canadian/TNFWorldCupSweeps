@@ -22,8 +22,10 @@ async function main() {
   let prev = null;
   try { prev = JSON.parse(fs.readFileSync(OUT, "utf8")); } catch (e) {}
 
-  const sameContent = prev && JSON.stringify(prev.matches) === JSON.stringify(next.matches);
-  const anyLive = next.matches.some((m) => m.status === "live");
+  const sameContent = prev
+    && JSON.stringify(prev.matches) === JSON.stringify(next.matches)
+    && JSON.stringify(prev.knockouts || []) === JSON.stringify(next.knockouts || []);
+  const anyLive = [...next.matches, ...(next.knockouts || [])].some((m) => m.status === "live");
 
   if (sameContent && !anyLive) {
     console.log("no change (and nothing live) — leaving data/matches.json untouched");
@@ -32,7 +34,7 @@ async function main() {
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(next, null, 2) + "\n");
-  console.log(`wrote data/matches.json — ${next.matches.length} matches${anyLive ? " (live)" : ""}`);
+  console.log(`wrote data/matches.json — ${next.matches.length} group + ${(next.knockouts || []).length} knockout${anyLive ? " (live)" : ""}`);
 }
 
 main().catch((e) => { console.error("ERROR:", e.message); process.exit(1); });

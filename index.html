@@ -175,6 +175,26 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .highlight-note .lucide{width:13px;height:13px;vertical-align:-2px;color:#f59e0b}
 .civil-icon .lucide,.civil-marker .lucide{width:11px;height:11px;color:#f59e0b}
 .mstatus.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:4px;vertical-align:1px;animation:livepulse 1.4s infinite}
+
+/* Tabs scroll horizontally when they don't fit */
+.tab-bar{overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{white-space:nowrap}
+
+/* Bracket */
+.bracket-rounds{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px}
+.bracket-round{min-width:188px;flex-shrink:0}
+.bracket-round-title{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
+.bmatch{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px;margin-bottom:8px}
+.bteam{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;border-left:3px solid transparent}
+.bteam+.bteam{margin-top:2px}
+.bteam.tbd .bteam-name{color:var(--muted);font-style:italic;font-weight:600}
+.bteam-name{font-size:12px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bteam-own{font-size:10px;font-weight:700;flex-shrink:0}
+.bteam.my-bteam{background:var(--sel-bg)}
+.bteam.winner .bteam-name{color:#fff}
+.bscore{text-align:center;font-size:11px;font-weight:800;color:#94a3b8;margin-top:3px}
+.bscore .lv{color:#fca5a5}
 </style>
 </head>
 <body>
@@ -206,12 +226,23 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <div class="tab-bar" role="tablist">
-  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('rankings',this)"><i data-lucide="medal"></i>Rankings</button>
+  <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('standings',this)"><i data-lucide="award"></i>Standings</button>
+  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('bracket',this)"><i data-lucide="git-fork"></i>Bracket</button>
   <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('schedule',this)"><i data-lucide="calendar"></i>Schedule</button>
   <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('groups',this)"><i data-lucide="layout-grid"></i>Groups</button>
+  <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('rankings',this)"><i data-lucide="percent"></i>Odds</button>
 </div>
 
-<div id="tab-rankings" class="tab-content active" role="tabpanel">
+<div id="tab-standings" class="tab-content active" role="tabpanel">
+  <p class="rankings-note">Live pool standings — each participant's total is the sum of their two teams' match points (<strong>win 3, draw 1, loss 0</strong>) from completed matches, updating as results come in. The knockout bracket arrives once the group stage finishes (Jun 27).</p>
+  <div id="standings-list"></div>
+</div>
+
+<div id="tab-bracket" class="tab-content" role="tabpanel">
+  <div id="bracket-list"></div>
+</div>
+
+<div id="tab-rankings" class="tab-content" role="tabpanel">
   <p class="rankings-note">Combined outright tournament-winner probability per participant (blended pre-tournament sportsbook odds, FanDuel / Fox / NBC / CBS). Bookmaker margin not removed — used for relative ranking only.</p>
   <div id="rankings-list"></div>
 </div>
@@ -482,8 +513,10 @@ async function loadLive(){
     const data = await res.json();
     const byKey = {};
     (data.matches||[]).forEach(m=>{ byKey[matchKey(m.home_id,m.away_id,m.group)] = m; });
-    LIVE = {byKey, fetched_at:data.fetched_at, source:data.source};
+    LIVE = {byKey, knockouts:data.knockouts||[], fetched_at:data.fetched_at, source:data.source};
     buildSchedule();
+    buildStandings();
+    buildBracket();
     applyPersonSelection(SELECTED, false); // re-apply highlight/filters on fresh cards
     updateFreshness();
     return true;
@@ -561,6 +594,11 @@ function applyPersonSelection(name, save=true){
     row.classList.toggle("my-team", row.dataset.owner===name);
   });
 
+  // Bracket
+  document.querySelectorAll("#bracket-list .bteam[data-team]").forEach(t=>{
+    t.classList.toggle("my-bteam", own(t.dataset.team)===name);
+  });
+
   // Modal buttons
   document.querySelectorAll(".person-option").forEach(btn=>{
     btn.classList.toggle("active-choice", btn.dataset.name===name);
@@ -603,6 +641,99 @@ function buildRankings(){
       <div class="rank-pct" style="color:${r.color}">${r.total.toFixed(1)}%</div>
     </div>`;
   }).join("");
+}
+
+// ─── STANDINGS (live points from match outcomes) ────────────────────────────────
+// Group points per team from completed matches in the live feed: win 3, draw 1, loss 0.
+function computeTeamPoints(){
+  const team={}; Object.keys(TEAMS).forEach(id=>team[id]={p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});
+  const games=[];
+  if(LIVE&&LIVE.byKey) games.push(...Object.values(LIVE.byKey));   // group stage
+  if(LIVE&&LIVE.knockouts) games.push(...LIVE.knockouts);           // knockouts (TBD entries skipped below)
+  games.forEach(m=>{
+    if(m.status!=="completed"||m.home_score==null||m.away_score==null) return;
+    const h=m.home_id, a=m.away_id; if(!team[h]||!team[a]) return;
+    const hs=+m.home_score, as=+m.away_score;
+    team[h].p++; team[a].p++; team[h].gf+=hs; team[h].ga+=as; team[a].gf+=as; team[a].ga+=hs;
+    if(hs>as){ team[h].w++; team[h].pts+=3; team[a].l++; }
+    else if(as>hs){ team[a].w++; team[a].pts+=3; team[h].l++; }
+    else { team[h].d++; team[a].d++; team[h].pts++; team[a].pts++; }
+  });
+  return team;
+}
+
+function buildStandings(){
+  const tp=computeTeamPoints();
+  const rows=POOL.map(p=>{
+    const [t1,t2]=p.teams;
+    const played=tp[t1].p+tp[t2].p;
+    const gd=(tp[t1].gf-tp[t1].ga)+(tp[t2].gf-tp[t2].ga);
+    return {name:p.name,color:p.color,t1,t2,a:tp[t1],b:tp[t2],pts:tp[t1].pts+tp[t2].pts,played,gd};
+  }).sort((x,y)=> y.pts-x.pts || y.gd-x.gd || y.played-x.played || x.name.localeCompare(y.name));
+  const anyPlayed=rows.some(r=>r.played>0);
+  const maxPts=Math.max(1,...rows.map(r=>r.pts));
+  const team=(id,t)=>`${esc(teamName(id))} <span style="color:#475569">${t.w}-${t.d}-${t.l}</span> <b style="color:#cbd5e1">${t.pts}</b>`;
+  let html = anyPlayed ? "" : `<p class="sched-note">No completed matches yet — points will appear here as games finish.</p>`;
+  html += rows.map((r,i)=>{
+    const top=i<3&&r.pts>0?"top":"";
+    return `<div class="rank-row" data-person="${esc(r.name)}" title="${esc(teamName(r.t1))}: ${r.a.pts} pts · ${esc(teamName(r.t2))}: ${r.b.pts} pts">
+      <div class="rank-num ${top}">#${i+1}</div>
+      <div class="rank-dot" style="background:${r.color}"></div>
+      <div class="rank-name" style="color:${r.color}">${esc(r.name)}</div>
+      <div class="rank-teams">${team(r.t1,r.a)} <span style="color:#1e3a5f">·</span> ${team(r.t2,r.b)}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.pts/maxPts*100).toFixed(0)}%;background:${r.color}"></div></div>
+      <div class="rank-pct" style="color:${r.color}">${r.pts}<span style="font-size:9px;color:#64748b;font-weight:600"> pts</span></div>
+    </div>`;
+  }).join("");
+  document.getElementById("standings-list").innerHTML=html;
+  document.querySelectorAll("#standings-list .rank-row").forEach(row=>row.classList.toggle("selected-me", row.dataset.person===SELECTED));
+  drawIcons();
+}
+
+// ─── BRACKET (knockout rounds; fills in as the draw resolves) ────────────────────
+const ROUND_LABELS={r32:"Round of 32",r16:"Round of 16",qf:"Quarter-finals",sf:"Semi-finals",third:"Third place",final:"Final"};
+const ROUND_ORDER=["r32","r16","qf","sf","third","final"];
+
+function bteam(id,m,side){
+  if(!id) return `<div class="bteam tbd"><span class="bteam-name">TBD</span></div>`;
+  const o=own(id), c=col(id);
+  const hs=m.home_score, as=m.away_score;
+  const win=m.status==="completed"&&hs!=null&&as!=null&&((side==="home"&&hs>as)||(side==="away"&&as>hs));
+  return `<div class="bteam${win?" winner":""}" data-team="${id}" style="border-left-color:${c||"transparent"}">
+    <span class="bteam-name">${esc(teamName(id))}</span>
+    ${o?`<span class="bteam-own" style="color:${c}">${esc(o)}</span>`:""}
+  </div>`;
+}
+function bracketMatch(m){
+  let sc="";
+  if(m.status==="live") sc=`<div class="bscore">${m.home_score??0}–${m.away_score??0} <span class="lv">LIVE</span></div>`;
+  else if(m.status==="completed"&&m.home_score!=null) sc=`<div class="bscore">${m.home_score}–${m.away_score}</div>`;
+  return `<div class="bmatch">${bteam(m.home_id,m,"home")}${bteam(m.away_id,m,"away")}${sc}</div>`;
+}
+function buildBracket(){
+  const ko=(LIVE&&LIVE.knockouts)||[];
+  const byRound={}; ROUND_ORDER.forEach(r=>byRound[r]=[]);
+  ko.forEach(m=>{ const r=(m.round||"").toLowerCase(); if(byRound[r]) byRound[r].push(m); });
+  const anyKnown=ko.some(m=>m.home_id||m.away_id);
+  let html=`<p class="rankings-note">${anyKnown
+    ? "Owner-coloured knockout bracket — slots fill in as teams qualify, with points counting toward the Standings."
+    : "The knockout bracket is set after the group stage (Jun 27). Slots show <em>TBD</em> until the draw resolves — this view then fills in automatically."}</p>`;
+  const cols=ROUND_ORDER.filter(r=>byRound[r].length);
+  if(cols.length){
+    html+=`<div class="bracket-rounds">`;
+    cols.forEach(r=>{
+      byRound[r].sort((a,b)=>(a.match_number||0)-(b.match_number||0));
+      html+=`<div class="bracket-round"><div class="bracket-round-title">${ROUND_LABELS[r]} <span style="color:#334155">(${byRound[r].length})</span></div>`;
+      byRound[r].forEach(m=>{ html+=bracketMatch(m); });
+      html+=`</div>`;
+    });
+    html+=`</div>`;
+  } else {
+    html+=`<p class="sched-note">No knockout fixtures published yet.</p>`;
+  }
+  document.getElementById("bracket-list").innerHTML=html;
+  document.querySelectorAll("#bracket-list .bteam[data-team]").forEach(t=>t.classList.toggle("my-bteam", own(t.dataset.team)===SELECTED));
+  drawIcons();
 }
 
 // ─── SCHEDULE ─────────────────────────────────────────────────────────────────
@@ -787,6 +918,8 @@ try{
 document.getElementById("tz-select").value=TZ_SEL;
 
 buildRankings();
+buildStandings();
+buildBracket();
 buildCivilNote();
 buildSchedule();
 buildGroups();
