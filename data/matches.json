@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-13T18:57:43.235Z",
+  "fetched_at": "2026-06-13T19:37:19.809Z",
   "matches": [
     {
       "group": "A",
@@ -123,9 +123,9 @@
       "kickoff_local": "06/13/2026 12:00",
       "home_id": "QAT",
       "away_id": "SUI",
-      "status": "scheduled",
-      "home_score": 1405,
-      "away_score": 22,
+      "status": "live",
+      "home_score": 0,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
