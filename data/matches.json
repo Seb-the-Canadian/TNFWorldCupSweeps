@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-14T08:23:17.692Z",
+  "fetched_at": "2026-06-14T17:47:42.924Z",
   "matches": [
     {
       "group": "A",
@@ -155,9 +155,9 @@
       "kickoff_local": "06/14/2026 12:00",
       "home_id": "GER",
       "away_id": "CUW",
-      "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "status": "live",
+      "home_score": 2,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
