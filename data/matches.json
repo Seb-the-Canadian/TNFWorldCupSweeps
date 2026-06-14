@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-14T21:06:38.756Z",
+  "fetched_at": "2026-06-14T21:39:51.868Z",
   "matches": [
     {
       "group": "D",
@@ -732,8 +732,8 @@
       "home_id": "NED",
       "away_id": "JPN",
       "status": "live",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": 2,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
