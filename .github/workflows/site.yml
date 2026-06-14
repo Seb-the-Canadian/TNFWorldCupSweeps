@@ -20,6 +20,7 @@ permissions:
   contents: write   # commit refreshed data
   pages: write      # deploy Pages
   id-token: write   # deploy Pages (OIDC)
+  actions: write    # re-dispatch self during live matches (near-live cadence)
 
 concurrency:
   group: site
@@ -93,3 +94,24 @@ jobs:
       - id: deploy
         if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         uses: actions/deploy-pages@v4
+
+      # ── Near-live cadence (opt-in) ──
+      # GitHub throttles the */5 cron to ~30-40 min, so during a live match the run
+      # re-dispatches itself (~2-min loop) to refresh far more often than cron allows.
+      # Fully opt-in: with no LIVE_DISPATCH_PAT secret this is a no-op and we just rely on
+      # cron. GITHUB_TOKEN can't self-trigger workflow_dispatch, hence a PAT (actions:write).
+      # The chain self-terminates the moment no match is live.
+      - name: Keep refreshing while a match is live
+        if: github.event_name != 'push'
+        env:
+          PAT: ${{ secrets.LIVE_DISPATCH_PAT }}
+        run: |
+          [ -z "$PAT" ] && { echo "no LIVE_DISPATCH_PAT — relying on cron cadence"; exit 0; }
+          node -e 'let d={};try{d=require("./data/matches.json")}catch(e){};process.exit([...(d.matches||[]),...(d.knockouts||[])].some(m=>m.status==="live")?0:1)' \
+            || { echo "nothing live — not chaining"; exit 0; }
+          sleep 60   # pace the chain to ~2 min (this run + ~60s) instead of hammering
+          curl -sf -X POST \
+            -H "Authorization: token $PAT" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/site.yml/dispatches" \
+            -d '{"ref":"main"}' && echo "re-dispatched for next live tick" || echo "::warning::re-dispatch failed"
