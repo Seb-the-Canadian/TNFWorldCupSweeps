@@ -123,13 +123,23 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 @keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* GROUPS */
-.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(254px,1fr));gap:10px}
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:10px}
 .group-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .group-card-header{padding:7px 13px;font-size:11px;font-weight:800;letter-spacing:.08em;
   text-transform:uppercase;background:var(--surface2)}
-.group-team-row{display:flex;justify-content:space-between;align-items:center;
-  padding:7px 13px;border-top:1px solid var(--border);transition:.1s background}
-.group-team-row.my-team{background:var(--sel-bg)!important;border-left:2px solid var(--sel-color)}
+.group-team-row{display:flex;align-items:center;gap:8px;
+  padding:6px 12px;border-top:1px solid var(--border);transition:.1s background;border-left:2px solid transparent}
+.group-team-row.my-team{background:var(--sel-bg)!important;border-left-color:var(--sel-color)}
+.group-team-row.adv{border-left-color:#4ade80}
+.group-team-row.third{border-left-color:#fbbf24}
+.gt-pos{font-size:10px;font-weight:800;color:var(--muted);width:12px;text-align:center;flex-shrink:0}
+.group-team-row.adv .gt-pos{color:#4ade80}
+.group-team-row.third .gt-pos{color:#fbbf24}
+.gt-main{flex:1;min-width:0}
+.gt-name{font-size:12px;color:#e2e8f0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt-sub{font-size:9px;color:#64748b;font-variant-numeric:tabular-nums;margin-top:1px}
+.gt-end{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.gt-pts{font-size:14px;font-weight:800;color:#e2e8f0;min-width:16px;text-align:right;font-variant-numeric:tabular-nums}
 .group-team-name{font-size:12px;color:#e2e8f0;font-weight:600}
 .civil-marker{color:#f59e0b;margin-left:3px}
 
@@ -295,7 +305,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <div id="tab-groups" class="tab-content" role="tabpanel">
-  <p class="rankings-note" style="margin-bottom:16px">Who owns which team in each group. Teams with no pool owner shown in grey. Win % = outright tournament probability.</p>
+  <p class="rankings-note" style="margin-bottom:16px">Live group tables — position, <strong>W-D-L</strong>, goal difference and points from completed matches (<span style="color:#4ade80">green</span> = top-2, advancing; <span style="color:#fbbf24">amber</span> = 3rd, in best-third contention). Owner shown per team; unclaimed teams in grey. Before a group kicks off, teams are ordered by pre-tournament win probability.</p>
   <div id="groups-grid" class="groups-grid"></div>
 </div>
 
@@ -539,6 +549,7 @@ async function loadLive(){
     LIVE = {byKey, knockouts:data.knockouts||[], fetched_at:data.fetched_at, source:data.source};
     buildSchedule();
     buildStandings();
+    buildGroups();   // live group tables update with results too
     buildBracket();
     applyPersonSelection(SELECTED, false); // re-apply highlight/filters on fresh cards
     updateFreshness();
@@ -947,29 +958,55 @@ function applyFilters(){
 }
 
 // ─── GROUPS ───────────────────────────────────────────────────────────────────
+// Live group-stage table per team (group matches only — knockouts excluded), computed
+// from completed results: P, W-D-L, GF/GA/GD, Pts. Ordering uses pts → GD → GF → name
+// (a close approximation of the FIFA tiebreakers; head-to-head/fair-play not modelled).
+function groupStandings(){
+  const s={}; Object.keys(TEAMS).forEach(id=>s[id]={p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});
+  if(LIVE&&LIVE.byKey) Object.values(LIVE.byKey).forEach(m=>{
+    if(m.status!=="completed"||m.home_score==null||m.away_score==null) return;
+    const h=m.home_id,a=m.away_id; if(!s[h]||!s[a]) return;
+    const hs=+m.home_score,as=+m.away_score;
+    s[h].p++;s[a].p++;s[h].gf+=hs;s[h].ga+=as;s[a].gf+=as;s[a].ga+=hs;
+    if(hs>as){s[h].w++;s[h].pts+=3;s[a].l++;}
+    else if(as>hs){s[a].w++;s[a].pts+=3;s[h].l++;}
+    else{s[h].d++;s[a].d++;s[h].pts++;s[a].pts++;}
+  });
+  return s;
+}
+
 function buildGroups(){
+  const st=groupStandings();
   let html="";
   Object.entries(GROUPS).forEach(([grp,teamIds])=>{
-    html+=`<div class="group-card">
-      <div class="group-card-header" style="color:${GC[grp]}">Group ${grp}</div>`;
-    // Show each group sorted by win probability (strongest first).
-    teamIds.slice().sort((a,b)=>prob(b)-prob(a)).forEach(id=>{
-      const o=own(id), p=prob(id), cw=CIVIL_TEAMS.has(id);
-      html+=`<div class="group-team-row" data-owner="${esc(o||'')}">
-        <div>
-          <span class="group-team-name">${esc(teamName(id))}</span>
-          ${cw?`<span class="civil-marker"><i data-lucide="zap"></i></span>`:""}
+    const played=teamIds.some(id=>st[id].p>0);
+    const ordered=teamIds.slice().sort((a,b)=> played
+      ? (st[b].pts-st[a].pts) || ((st[b].gf-st[b].ga)-(st[a].gf-st[a].ga)) || (st[b].gf-st[a].gf) || teamName(a).localeCompare(teamName(b))
+      : prob(b)-prob(a));
+    html+=`<div class="group-card"><div class="group-card-header" style="color:${GC[grp]}">Group ${grp}</div>`;
+    ordered.forEach((id,i)=>{
+      const o=own(id), s=st[id], cw=CIVIL_TEAMS.has(id), gd=s.gf-s.ga;
+      const zone = played ? (i<2?"adv":(i===2?"third":"")) : "";
+      const sub = played
+        ? `${s.w}-${s.d}-${s.l} · GD ${gd>0?"+":""}${gd} · ${s.p} pld`
+        : `${prob(id).toFixed(2)}% to win`;
+      html+=`<div class="group-team-row ${zone}" data-owner="${esc(o||'')}">
+        <span class="gt-pos">${played?(i+1):"·"}</span>
+        <div class="gt-main">
+          <div class="gt-name">${esc(teamName(id))}${cw?`<span class="civil-marker"><i data-lucide="zap"></i></span>`:""}</div>
+          <div class="gt-sub">${sub}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:10px;color:#3d5270">${p.toFixed(2)}%</span>
+        <div class="gt-end">
           ${o?`<span class="owner-tag" style="background:${bg(id)};color:${col(id)}">${esc(o)}</span>`
-             :`<span class="owner-tag none">unclaimed</span>`}
+             :`<span class="owner-tag none">—</span>`}
+          ${played?`<span class="gt-pts">${s.pts}</span>`:""}
         </div>
       </div>`;
     });
     html+="</div>";
   });
   document.getElementById("groups-grid").innerHTML=html;
+  document.querySelectorAll(".group-team-row").forEach(row=>row.classList.toggle("my-team", row.dataset.owner===SELECTED));
   drawIcons();
 }
 

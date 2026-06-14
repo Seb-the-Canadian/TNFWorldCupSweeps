@@ -33,13 +33,13 @@ civil-war countdown, conviction signal). Phased to ship value early and de-risk 
       ID-keyed `TEAMS`/`POOL` model (groups, owners, and civil wars now *derived*, not
       hardcoded). `scripts/check-data.js` (`npm test`) guards inline↔JSON drift. Removes the
       biggest failure mode (three sources disagreeing on team-name strings).
-- [x] **Phase B — Live scores.** ✅ Shipped and verified end-to-end (2026-06-13): the
+- [x] **Phase B — Live scores & standings.** ✅ Shipped/verified (2026-06-13/14): the
       worldcup26.ir adapter (fifa_code join validated against canonical IDs, stadium-tz
       kickoff instants, penalty scores, knockouts array), change-only refresh + deploy,
-      tournament-window guard (Jun 11 – Jul 20), and the client live layer (feed-first
-      schedule, scores/LIVE/FT overlay, freshness pill, 60s poll). Schema confirmed
-      against live payloads. *Remaining idea:* live group W/D/L tables on the Groups tab
-      (feed `/get/groups`).
+      tournament-window guard (Jun 11 – Jul 20), client live layer (feed-first schedule,
+      scores/LIVE/FT overlay, freshness pill, 60s cache-busted poll), and **live group
+      tables** on the Groups tab (position, W-D-L, GD, Pts from results; advancing zones).
+      Live-score lag mitigated (cache-bust + optional `LIVE_DISPATCH_PAT` near-live chain).
 - [ ] **Phase C — Probabilities & analytics.** Polymarket Gamma adapter → `probabilities.json`
       + `pool-stats.json`; daily history snapshots; momentum, trajectory chart, conviction signal.
 
