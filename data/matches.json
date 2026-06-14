@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-14T21:39:51.868Z",
+  "fetched_at": "2026-06-14T22:06:27.067Z",
   "matches": [
     {
       "group": "D",
@@ -444,8 +444,8 @@
       "home_id": "CIV",
       "away_id": "ECU",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -731,9 +731,9 @@
       "kickoff_local": "06/14/2026 15:00",
       "home_id": "NED",
       "away_id": "JPN",
-      "status": "live",
+      "status": "completed",
       "home_score": 2,
-      "away_score": 1,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
