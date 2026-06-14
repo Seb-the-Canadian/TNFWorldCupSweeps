@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-14T02:17:18.500Z",
+  "fetched_at": "2026-06-14T03:34:28.182Z",
   "matches": [
     {
       "group": "A",
@@ -75,7 +75,7 @@
       "kickoff_local": "06/13/2026 21:00",
       "home_id": "HAI",
       "away_id": "SCO",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 1,
       "home_pen": null,
