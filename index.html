@@ -241,7 +241,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="tab-bar" role="tablist">
   <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-rankings" onclick="switchTab('rankings',this)"><i data-lucide="award"></i>Rankings</button>
-  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-bracket" onclick="switchTab('bracket',this)"><i data-lucide="git-fork"></i>Bracket</button>
+  <button class="tab-btn" id="tab-btn-bracket" role="tab" aria-selected="false" aria-controls="tab-bracket" style="display:none" onclick="switchTab('bracket',this)"><i data-lucide="git-fork"></i>Bracket</button>
   <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule',this)"><i data-lucide="calendar"></i>Schedule</button>
   <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-groups" onclick="switchTab('groups',this)"><i data-lucide="layout-grid"></i>Groups</button>
 </div>
@@ -529,7 +529,9 @@ function matchKey(a,b,group){ return group+":"+[a,b].sort().join("-"); }
 
 async function loadLive(){
   try{
-    const res = await fetch("data/matches.json", {cache:"no-store"});
+    // cache-bust query: no-store stops the BROWSER cache, but GitHub Pages' CDN caches the
+    // file ~10 min — a unique ?t= is a distinct URL, so each poll bypasses that staleness.
+    const res = await fetch("data/matches.json?t="+Date.now(), {cache:"no-store"});
     if(!res.ok) return false;
     const data = await res.json();
     const byKey = {};
@@ -786,6 +788,23 @@ function buildBracket(){
   document.getElementById("bracket-list").innerHTML=html;
   document.querySelectorAll("#bracket-list .bteam[data-team]").forEach(t=>t.classList.toggle("my-bteam", own(t.dataset.team)===SELECTED));
   drawIcons();
+  updateBracketTab();
+}
+
+// The Bracket tab is hidden while every slot is TBD (pre-draw) — no point taking up a tab
+// for an empty view; it reveals itself automatically once the feed assigns any knockout team.
+function updateBracketTab(){
+  const btn=document.getElementById("tab-btn-bracket");
+  if(!btn) return;
+  const known=!!(LIVE&&LIVE.knockouts&&LIVE.knockouts.some(m=>m.home_id||m.away_id));
+  btn.style.display = known ? "" : "none";
+  if(!known){
+    const panel=document.getElementById("tab-bracket");
+    if(panel&&panel.classList.contains("active")){
+      const rank=document.querySelector('.tab-btn[aria-controls="tab-rankings"]');
+      if(rank) rank.click();
+    }
+  }
 }
 
 // ─── SCHEDULE ─────────────────────────────────────────────────────────────────

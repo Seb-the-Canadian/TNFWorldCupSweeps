@@ -14,8 +14,9 @@ committed to `data/` by a scheduled GitHub Action.
   each participant's running sum of their two teams' match points, win 3 / draw 1 /
   loss 0; knockout shoot-out wins count as wins) and **Pre-Tournament Odds** (combined
   outright-winner probability from blended sportsbook odds; a fixed snapshot).
-- **Bracket** — Round-of-32 → Final, owner-coloured; slots show TBD until the group
-  stage resolves (Jun 27) and then fill in automatically, including penalty results.
+- **Bracket** — Round-of-32 → Final, owner-coloured. The tab stays hidden while every
+  slot is TBD (it'd be empty pre-draw) and reveals itself automatically once the group
+  stage resolves (Jun 27), filling in as teams qualify, including penalty results.
 - **Schedule** — all 72 group matches with live scores, grouped by day in your time
   zone. Feed-first: pairings and kickoff times come from the live feed when available.
   Filter by group, "My Matches", pool battles, or civil wars.
@@ -55,6 +56,15 @@ bracket. When it's absent the dashboard falls back to its static schedule — no
 The upstream schema was verified against live payloads (2026-06-13). If the feed ever
 renames a team, the Action fails loudly with the raw sample — add the alias to
 `data/teams.json` and run `npm test`.
+
+### Near-live updates during matches (optional)
+
+GitHub throttles the `*/5` cron to roughly every 30–40 min, so by default live scores lag
+that much. To get ~2-minute updates while a match is in progress, create a fine-grained
+**Personal Access Token** with *Actions: read & write* on this repo and add it as a repo
+secret named **`LIVE_DISPATCH_PAT`**. When present, each run re-dispatches itself while any
+match is live (and stops automatically when none is), bypassing the cron throttle. Without
+the secret the workflow simply relies on cron — no errors either way.
 
 ## Editing the data
 

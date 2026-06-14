@@ -22,12 +22,12 @@ function extractInline() {
   const script = html.match(/<script>([\s\S]*)<\/script>/)[1];
   const el = () => ({
     style: { setProperty() {} }, value: "",
-    classList: { toggle() {}, add() {}, remove() {} },
-    addEventListener() {}, setAttribute() {}, querySelectorAll: () => [],
+    classList: { toggle() {}, add() {}, remove() {}, contains: () => false },
+    addEventListener() {}, setAttribute() {}, querySelectorAll: () => [], click() {}, focus() {},
     set innerHTML(_) {},
   });
   global.document = {
-    getElementById: el, querySelectorAll: () => [],
+    getElementById: el, querySelector: el, querySelectorAll: () => [],
     documentElement: { style: { setProperty() {} } }, addEventListener() {}, hidden: true,
   };
   global.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
