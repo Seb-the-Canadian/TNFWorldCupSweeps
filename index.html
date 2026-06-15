@@ -282,6 +282,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <label for="filter-mode">Filter:</label>
     <select class="filter-select" id="filter-mode" onchange="applyFilters()">
       <option value="all">All Matches</option>
+      <option value="today">Today / Next Matchday</option>
       <option value="pool">Pool Battles (both teams owned)</option>
       <option value="mymatches">My Matches</option>
       <option value="civilwar">Civil Wars Only</option>
@@ -890,7 +891,7 @@ function buildSchedule(){
 
       let cls="match-card";
       if(isCivil) cls+=" civil-war";
-      html+=`<div class="${cls}" data-group="${esc(m.g)}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
+      html+=`<div class="${cls}" data-group="${esc(m.g)}" data-datekey="${esc(key)}" data-ho="${esc(ho)}" data-ao="${esc(ao)}" data-civil="${isCivil?1:0}">
         <div class="grp-badge" style="background:${GC[m.g]}22;color:${GC[m.g]};border:1px solid ${GC[m.g]}44">${esc(m.g)}</div>
         <div class="team-side">
           ${ownerTag(m.home)}
@@ -933,6 +934,15 @@ function applyFilters(){
 
   note.classList.toggle("visible", mode==="mymatches" && !SELECTED);
 
+  // "Today" mode → the date-key (in the viewer's zone) to show: today if it has matches,
+  // otherwise the next upcoming match day (or the last day once the tournament is over).
+  let targetKey=null;
+  if(mode==="today"){
+    const todayKey=new Intl.DateTimeFormat("en-CA",{timeZone:effectiveZone(),year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+    const keys=[...new Set([...document.querySelectorAll(".match-card")].map(c=>c.dataset.datekey).filter(Boolean))].sort();
+    targetKey = keys.includes(todayKey) ? todayKey : (keys.find(k=>k>=todayKey) || keys[keys.length-1] || null);
+  }
+
   let visibleCount=0;
   document.querySelectorAll(".match-card").forEach(card=>{
     const cg=card.dataset.group, ho=card.dataset.ho, ao=card.dataset.ao;
@@ -942,6 +952,7 @@ function applyFilters(){
 
     let show=true;
     if(grp!=="all"&&cg!==grp) show=false;
+    if(mode==="today"&&card.dataset.datekey!==targetKey) show=false;
     if(mode==="pool"&&!isBattle&&!isCivil) show=false;
     if(mode==="mymatches"&&!isMy) show=false;
     if(mode==="civilwar"&&!isCivil) show=false;

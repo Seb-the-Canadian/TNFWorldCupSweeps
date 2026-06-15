@@ -65,7 +65,8 @@ response; whether a per-team "to advance" market exists; group-winner slugs B–
   + **Tier 2** (live best-third race) first; probabilistic "% to advance" (Tier 3) later.
   Deferred until the rest of the backlog is cleared; placement/fidelity TBD (see doc).
 - **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers, history chart.
-- **"Today" view** — collapse the schedule to just today's (or the next) matches.
+- [x] **"Today" view** ✅ — Schedule filter "Today / Next Matchday" collapses to the current
+  day's matches in the viewer's time zone, or the next match day when today is an off day.
 - **Share / deep links** — URL params so `?me=Seb&tz=Europe/London` opens pre-configured.
 - **Confirm `~est.` fixtures** — replace estimated Group K/L pairings and matchday-3
   times/venues with the official schedule once finalised.
