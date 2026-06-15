@@ -40,14 +40,12 @@ civil-war countdown, conviction signal). Phased to ship value early and de-risk 
       scores/LIVE/FT overlay, freshness pill, 60s cache-busted poll), and **live group
       tables** on the Groups tab (position, W-D-L, GD, Pts from results; advancing zones).
       Live-score lag mitigated (cache-bust + optional `LIVE_DISPATCH_PAT` near-live chain).
-- [~] **Phase C — Probabilities & analytics.** *Odds momentum shipped (defensive-first), pending
-      first-run verification:* `scripts/fetch-odds.js` (Polymarket Gamma, tolerant parsing) →
-      `data/probabilities.json`; the Odds sub-view shows live market-implied combined probability
-      + 24h momentum + a movers strip, degrading to the static blend when absent. *Still to do:*
-      daily history snapshots + a trajectory chart; optional conviction (volume) signal.
-      **First-run check:** Gamma is egress-blocked from dev, so field names are mapped defensively
-      — watch the first Action run; if `fetch-odds` errors with a raw sample, adjust the field
-      picks / aliases and re-run.
+- [x] **Phase C — Probabilities & analytics.** ✅ Verified live (first run resolved all 48 teams):
+      `scripts/fetch-odds.js` (Polymarket Gamma, tolerant) → `data/probabilities.json`; daily
+      `data/history.json` snapshots. The **Odds** sub-view shows live market-implied combined
+      probability, a **variance-vs-pre-tournament** chip, a movers strip, and a **trajectory
+      sparkline** (from history); degrades to the static blend when absent. *Optional later:*
+      a volume "conviction" signal.
 
 **Verify before building Phase C:** Gamma field names on a live `world-cup-winner`
 response; whether a per-team "to advance" market exists; group-winner slugs B–L.
@@ -70,8 +68,9 @@ response; whether a per-team "to advance" market exists; group-winner slugs B–
   Recommended build: deterministic **Tier 1** (clinch/eliminate + next-match requirement)
   + **Tier 2** (live best-third race) first; probabilistic "% to advance" (Tier 3) later.
   Deferred until the rest of the backlog is cleared; placement/fidelity TBD (see doc).
-- [~] **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers ✅ (Odds sub-view);
-  history-based trajectory chart still to come (needs daily `data/history/*.json` snapshots).
+- [x] **Probability momentum & trajectory** ✅ *(→ Epic Phase C)* — Odds sub-view shows
+  variance vs pre-tournament, a movers strip, and a per-participant trajectory sparkline
+  fed by daily `data/history.json` snapshots.
 - [x] **"Today" view** ✅ — Schedule filter "Today / Next Matchday" collapses to the current
   day's matches in the viewer's time zone, or the next match day when today is an off day.
 - [x] **Share / deep links** ✅ — `?me=` & `?tz=` (& `?tab=`) preset the view on load and the
