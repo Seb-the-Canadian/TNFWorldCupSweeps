@@ -59,8 +59,17 @@ response; whether a per-team "to advance" market exists; group-winner slugs B–
   coloured by owner, fed by the knockout rows from the feed. Shows TBD slots now and fills
   in automatically once the draw resolves (Jun 27); completed knockout results count toward
   the Standings points. Future polish: connector lines and a "still alive per participant" tally.
+- **Road to R32 ("path to advancing")** *(design note: [`docs/road-to-r32.md`](docs/road-to-r32.md))* —
+  per-team and per-participant "what does it take to reach the Round of 32?" view.
+  Recommended build: deterministic **Tier 1** (clinch/eliminate + next-match requirement)
+  + **Tier 2** (live best-third race) first; probabilistic "% to advance" (Tier 3) later.
+  Deferred until the rest of the backlog is cleared; placement/fidelity TBD (see doc).
 - **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers, history chart.
-- **"Today" view** — collapse the schedule to just today's (or the next) matches.
-- **Share / deep links** — URL params so `?me=Seb&tz=Europe/London` opens pre-configured.
-- **Confirm `~est.` fixtures** — replace estimated Group K/L pairings and matchday-3
-  times/venues with the official schedule once finalised.
+- [x] **"Today" view** ✅ — Schedule filter "Today / Next Matchday" collapses to the current
+  day's matches in the viewer's time zone, or the next match day when today is an off day.
+- [x] **Share / deep links** ✅ — `?me=` & `?tz=` (& `?tab=`) preset the view on load and the
+  address bar reflects the current selection, so the URL is always copy-paste shareable.
+- [x] **Confirm `~est.` fixtures** ✅ — resolved by the feed-first schedule: real pairings and
+  stadium-resolved kickoff times from the feed override the static estimates (the `~est.`
+  badges no longer render once the feed is present). The static table remains only as an
+  offline/bootstrap fallback.
