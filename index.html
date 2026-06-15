@@ -166,7 +166,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   padding:10px 13px;font-size:11px;color:#7aa4cc;margin-bottom:14px;line-height:1.6}
 
 @media(max-width:580px){
-  .rank-bar-wrap,.tier-badge,.mom{display:none}
+  .rank-bar-wrap,.tier-badge,.mom,.spark-wrap{display:none}
   .match-card{grid-template-columns:22px 1fr auto 1fr 70px}
 }
 
@@ -230,6 +230,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mv{font-weight:700}
 .mv.up{color:#4ade80}
 .mv.down{color:#f87171}
+.spark-wrap{width:110px;height:24px;flex-shrink:0;display:flex;align-items:center}
+.spark{width:110px;height:22px;display:block}
 </style>
 </head>
 <body>
@@ -270,7 +272,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div id="tab-rankings" class="tab-content active" role="tabpanel">
   <div class="subtab-bar" role="tablist">
     <button class="subtab-btn active" role="tab" aria-selected="true" onclick="switchSub('points',this)">Live Points</button>
-    <button class="subtab-btn" role="tab" aria-selected="false" onclick="switchSub('odds',this)">Pre-Tournament Odds</button>
+    <button class="subtab-btn" role="tab" aria-selected="false" onclick="switchSub('odds',this)">Odds</button>
   </div>
   <div id="sub-points" class="subview active">
     <div class="desc-box"><strong>Live Points</strong> — each participant's score is the running sum of their two teams' match points: <strong>win 3, draw 1, loss 0</strong>, from completed matches (group stage now, knockouts later; shoot-out wins count as wins). Team records are shown as <strong>W-D-L</strong>. Updates automatically as results come in.</div>
@@ -546,6 +548,29 @@ const MATCHES=[
 // runs, or offline), the dashboard renders exactly as the static schedule — no errors.
 let LIVE = null; // { byKey:{key:match}, knockouts, fetched_at, source } or null
 let ODDS = null; // { teams:{ID:{prob,change24h,volume}}, fetched_at, … } or null (optional overlay)
+let HIST = null; // { days:[{date,teams:{ID:prob}}], … } or null (trajectory sparkline data)
+
+// Daily probability history (data/history.json) — powers the Odds trajectory sparkline.
+async function loadHistory(){
+  try{
+    const res = await fetch("data/history.json?t="+Date.now(), {cache:"no-store"});
+    if(!res.ok) return false;
+    const data = await res.json();
+    if(data && Array.isArray(data.days)){ HIST = data; buildRankings(); }
+    return true;
+  }catch(e){ return false; }
+}
+// Tiny inline sparkline (polyline) from a numeric series.
+function sparkline(vals,color){
+  if(!vals || vals.length<2) return "";
+  const w=110,h=22,pad=2, min=Math.min(...vals), max=Math.max(...vals), rng=(max-min)||1;
+  const pts=vals.map((v,i)=>{
+    const x=pad+(w-2*pad)*(i/(vals.length-1));
+    const y=h-pad-(h-2*pad)*((v-min)/rng);
+    return x.toFixed(1)+","+y.toFixed(1);
+  }).join(" ");
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
 
 // Optional market-odds overlay (data/probabilities.json). Absent → Odds view stays static.
 async function loadOdds(){
@@ -703,12 +728,13 @@ function closeModal(){ document.getElementById("modal").style.display="none"; }
 function buildRankings(){
   // Live market odds when data/probabilities.json is loaded; else the static pre-tournament blend.
   const live = !!(ODDS && ODDS.teams && Object.keys(ODDS.teams).length>=20);
-  const pr  = id => live ? ((ODDS.teams[id]? +ODDS.teams[id].prob : 0)*100) : prob(id);
-  const chg = id => (live && ODDS.teams[id] && ODDS.teams[id].change24h!=null) ? ODDS.teams[id].change24h*100 : 0;
+  const pre = id => prob(id);                                              // pre-tournament blended %
+  const pr  = id => live ? ((ODDS.teams[id]? +ODDS.teams[id].prob : 0)*100) : pre(id); // current %
+  const teamVar = id => (live && ODDS.teams[id]) ? (pr(id)-pre(id)) : 0;   // variance vs pre-tournament
 
   const ranked = POOL.map(p=>{
     const [t1,t2]=p.teams;
-    return {name:p.name,color:p.color,t1,t2,p1:pr(t1),p2:pr(t2),total:pr(t1)+pr(t2),mom:chg(t1)+chg(t2)};
+    return {name:p.name,color:p.color,t1,t2,p1:pr(t1),p2:pr(t2),total:pr(t1)+pr(t2),varc:(pr(t1)+pr(t2))-(pre(t1)+pre(t2))};
   }).sort((a,b)=>b.total-a.total);
   const max=(ranked[0]&&ranked[0].total)||1;
 
@@ -719,30 +745,39 @@ function buildRankings(){
     if(t>=0.8)return {label:"Underdog",  bg:"rgba(249,115,22,.12)", col:"#fb923c"};
     return           {label:"Long Shot", bg:"rgba(239,68,68,.12)",  col:"#f87171"};
   }
-  const momChip = v => {
+  // Variance chip: how far this participant's current market odds have moved from their
+  // pre-tournament baseline (▲ drifted in / ▼ drifted out).
+  const varChip = v => {
     const up=v>=0, s=(up?"+":"")+v.toFixed(1);
-    return `<div class="mom ${up?"up":"down"}"><i data-lucide="${up?"trending-up":"trending-down"}"></i>${s}</div>`;
+    return `<div class="mom ${up?"up":"down"}" title="variance vs pre-tournament odds"><i data-lucide="${up?"trending-up":"trending-down"}"></i>${s}</div>`;
   };
 
-  // "Movers (24h)" strip — the biggest pool-team swings, when live.
+  // Trajectory sparkline (combined prob over days) when we have ≥2 days of history; else the bar.
+  const histDays = (HIST && Array.isArray(HIST.days)) ? HIST.days.slice(-14) : [];
+  const canSpark = live && histDays.length>=2;
+  const trendCell = r => canSpark
+    ? `<div class="spark-wrap" title="${histDays.length}-day trajectory">${sparkline(histDays.map(d=>(d.teams[r.t1]||0)+(d.teams[r.t2]||0)), r.color)}</div>`
+    : `<div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.total/max*100).toFixed(1)}%;background:${r.color}"></div></div>`;
+
+  // "Movers" strip — biggest pool-team variance vs the pre-tournament line, when live.
   let strip="";
   if(live){
-    const moves=[...new Set(POOL.flatMap(p=>p.teams))].map(id=>({id,c:chg(id)}))
-      .filter(x=>Math.abs(x.c)>=0.1).sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)).slice(0,5);
-    if(moves.length) strip=`<div class="movers"><span class="movers-label">Movers 24h</span>`+
+    const moves=[...new Set(POOL.flatMap(p=>p.teams))].map(id=>({id,c:teamVar(id)}))
+      .filter(x=>Math.abs(x.c)>=0.2).sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)).slice(0,5);
+    if(moves.length) strip=`<div class="movers"><span class="movers-label">Vs pre-tournament</span>`+
       moves.map(m=>`<span class="mv ${m.c>=0?"up":"down"}">${esc(teamName(m.id))} ${(m.c>=0?"+":"")+m.c.toFixed(1)}</span>`).join("")+`</div>`;
   }
 
   const rows = ranked.map((r,i)=>{
     const t=tier(r.total), topCls=i<3?"top":"";
-    const lastCol = live ? momChip(r.mom) : `<div class="tier-badge" style="background:${t.bg};color:${t.col}">${t.label}</div>`;
+    const lastCol = live ? varChip(r.varc) : `<div class="tier-badge" style="background:${t.bg};color:${t.col}">${t.label}</div>`;
     return `<div class="rank-row" data-person="${esc(r.name)}" title="${esc(teamName(r.t1))}: ${r.p1.toFixed(2)}% | ${esc(teamName(r.t2))}: ${r.p2.toFixed(2)}%">
       <div class="rank-num ${topCls}">#${i+1}</div>
       <div class="rank-dot" style="background:${r.color}"></div>
       <div class="rank-name" style="color:${r.color}">${esc(r.name)}</div>
       <div class="rank-teams">${esc(teamName(r.t1))} <span style="color:#1e3a5f">+</span> ${esc(teamName(r.t2))}</div>
       ${lastCol}
-      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.total/max*100).toFixed(1)}%;background:${r.color}"></div></div>
+      ${trendCell(r)}
       <div class="rank-pct" style="color:${r.color}">${r.total.toFixed(1)}%</div>
     </div>`;
   }).join("");
@@ -750,8 +785,8 @@ function buildRankings(){
 
   const desc=document.getElementById("odds-desc");
   if(desc) desc.innerHTML = live
-    ? `<strong>Live market odds</strong> — each participant's combined win probability implied by Polymarket trading, with 24h momentum (▲ riser / ▼ faller). Updated ${ODDS.fetched_at?esc(timeAgo(ODDS.fetched_at)):"recently"}.`
-    : `<strong>Pre-Tournament Odds</strong> — each participant's combined outright tournament-winner probability, from blended pre-tournament sportsbook odds (FanDuel / Fox / NBC / CBS). A fixed pre-tournament snapshot for comparison — it doesn't change with live results.`;
+    ? `<strong>Odds</strong> — each participant's combined win probability implied by live Polymarket trading${ODDS.fetched_at?` (updated ${esc(timeAgo(ODDS.fetched_at))})`:""}. The <span style="color:#4ade80">▲</span>/<span style="color:#f87171">▼</span> is the <strong>variance vs the pre-tournament odds</strong> — how far each team has drifted from the blended sportsbook line it opened at${canSpark?"; the spark shows its recent trajectory":""}.`
+    : `<strong>Odds</strong> — each participant's combined outright tournament-winner probability, from blended pre-tournament sportsbook odds (FanDuel / Fox / NBC / CBS). Once live market data loads, this becomes the current market odds with variance shown vs this pre-tournament baseline.`;
   document.querySelectorAll("#rankings-list .rank-row").forEach(row=>row.classList.toggle("selected-me", row.dataset.person===SELECTED));
   drawIcons();
 }
@@ -1191,7 +1226,8 @@ applyFilters();
 // even when the fetch itself starts failing.
 loadLive();
 loadOdds();
-setInterval(()=>{ if(!document.hidden){ loadLive(); loadOdds(); updateFreshness(); } }, 60000);
+loadHistory();
+setInterval(()=>{ if(!document.hidden){ loadLive(); loadOdds(); loadHistory(); updateFreshness(); } }, 60000);
 </script>
 </body>
 </html>
