@@ -12,8 +12,9 @@ committed to `data/` by a scheduled GitHub Action.
 
 - **Rankings** — two sub-views with a description box each: **Live Points** (default —
   each participant's running sum of their two teams' match points, win 3 / draw 1 /
-  loss 0; knockout shoot-out wins count as wins) and **Pre-Tournament Odds** (combined
-  outright-winner probability from blended sportsbook odds; a fixed snapshot).
+  loss 0; knockout shoot-out wins count as wins) and **Odds** — live market-implied win
+  probability (Polymarket) with 24h momentum + a "movers" strip when available, otherwise
+  the fixed pre-tournament sportsbook blend.
 - **Bracket** — Round-of-32 → Final, owner-coloured. The tab stays hidden while every
   slot is TBD (it'd be empty pre-draw) and reveals itself automatically once the group
   stage resolves (Jun 27), filling in as teams qualify, including penalty results.
@@ -49,8 +50,13 @@ bracket. When it's absent the dashboard falls back to its static schedule — no
   IDs (name-alias fallback; fails loudly on an unresolved group team), computes true UTC
   kickoff instants from venue-local times via a stadium→timezone map, and carries penalty
   shoot-out scores for knockouts.
-- `scripts/refresh.js` — writes `data/matches.json` only when results change (or a match
-  is live), keeping commits/deploys minimal; scheduled runs deploy only on change.
+- `scripts/fetch-odds.js` — fetches Polymarket Gamma (the "world-cup-winner" event) and maps
+  each team's market to an implied probability + 24h momentum + volume → `data/probabilities.json`.
+  Tolerant parsing; fails loudly on a schema change. Optional — the Odds view degrades to the
+  static blend when the file is absent.
+- `scripts/refresh.js` — writes `data/matches.json` (and best-effort `data/probabilities.json`)
+  only when the content changes (or a match is live), keeping commits/deploys minimal; scheduled
+  runs deploy only on change.
 - `scripts/schedule.js` — guards the cron to the tournament window (Jun 11 – Jul 20 UTC).
 
 The upstream schema was verified against live payloads (2026-06-13). If the feed ever
