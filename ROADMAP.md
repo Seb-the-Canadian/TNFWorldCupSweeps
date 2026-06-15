@@ -67,6 +67,9 @@ response; whether a per-team "to advance" market exists; group-winner slugs B–
 - **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers, history chart.
 - [x] **"Today" view** ✅ — Schedule filter "Today / Next Matchday" collapses to the current
   day's matches in the viewer's time zone, or the next match day when today is an off day.
-- **Share / deep links** — URL params so `?me=Seb&tz=Europe/London` opens pre-configured.
-- **Confirm `~est.` fixtures** — replace estimated Group K/L pairings and matchday-3
-  times/venues with the official schedule once finalised.
+- [x] **Share / deep links** ✅ — `?me=` & `?tz=` (& `?tab=`) preset the view on load and the
+  address bar reflects the current selection, so the URL is always copy-paste shareable.
+- [x] **Confirm `~est.` fixtures** ✅ — resolved by the feed-first schedule: real pairings and
+  stadium-resolved kickoff times from the feed override the static estimates (the `~est.`
+  badges no longer render once the feed is present). The static table remains only as an
+  offline/bootstrap fallback.

@@ -190,7 +190,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mstatus.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:4px;vertical-align:1px;animation:livepulse 1.4s infinite}
 
 /* Tabs scroll horizontally when they don't fit */
-.tab-bar{overflow-x:auto;scrollbar-width:none}
+.tab-bar{overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:30}
 .tab-bar::-webkit-scrollbar{display:none}
 .tab-btn{white-space:nowrap}
 
@@ -645,7 +645,26 @@ function applyPersonSelection(name, save=true){
   // Close the picker only on an explicit user choice (save=true). This function is also
   // reused as a re-render hook by the 60s live poll (save=false) — that path must never
   // slam the modal shut while someone is choosing their name.
-  if(save) closeModal();
+  if(save){ closeModal(); updateShareURL(); }
+}
+
+// ─── DEEP LINKS / SHARE ─────────────────────────────────────────────────────────
+// Read ?me= & ?tz= (& ?tab=) on load; reflect the current selection back into the address
+// bar so the URL is always copy-paste shareable (e.g. ?me=seb&tz=Europe/London).
+function readParams(){ try{ return new URLSearchParams(location.search); }catch(e){ return new URLSearchParams(); } }
+function findPerson(v){
+  if(!v) return null;
+  const t=String(v).trim().toLowerCase();
+  const p=POOL.find(x=>x.name.toLowerCase()===t || x.id===t);
+  return p ? p.name : null;
+}
+function updateShareURL(){
+  try{
+    const u=new URL(location.href), q=u.searchParams;
+    if(SELECTED && PMAP[SELECTED]) q.set("me", PMAP[SELECTED].id); else q.delete("me");
+    if(TZ_SEL && TZ_SEL!=="auto") q.set("tz", TZ_SEL); else q.delete("tz");
+    history.replaceState(null, "", u);
+  }catch(e){}
 }
 
 function clearSelection(){ applyPersonSelection(null); }
@@ -925,6 +944,7 @@ function setTimezone(sel){
   if(picker) picker.value=TZ_SEL;
   buildSchedule();
   applyPersonSelection(SELECTED,false); // re-highlight my-matches and re-run filters on fresh cards
+  updateShareURL();
 }
 
 function applyFilters(){
@@ -1061,11 +1081,11 @@ function switchSub(name,btn){
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-// Restore saved time zone first so the schedule renders in the right zone on load.
-try{
-  const tz=localStorage.getItem("wc-pool-tz");
-  if(tz==="auto"||TZ_IDS.includes(tz)) TZ_SEL=tz;
-}catch(e){}
+// Time zone precedence: ?tz= URL param > saved preference > auto.
+const PARAMS = readParams();
+const urlTz = PARAMS.get("tz");
+if(urlTz==="auto"||TZ_IDS.includes(urlTz)) TZ_SEL=urlTz;
+else { try{ const tz=localStorage.getItem("wc-pool-tz"); if(tz==="auto"||TZ_IDS.includes(tz)) TZ_SEL=tz; }catch(e){} }
 document.getElementById("tz-select").value=TZ_SEL;
 
 buildRankings();
@@ -1100,11 +1120,19 @@ document.querySelectorAll('[role="tablist"]').forEach(bar=>{
   });
 });
 
-// Restore saved selection
-try{
-  const saved=localStorage.getItem("wc-pool-person");
-  if(saved&&PMAP[saved]) applyPersonSelection(saved, false);
-}catch(e){}
+// Selection precedence: ?me= URL param > saved preference. URL value persists for the visitor.
+const urlMe=findPerson(PARAMS.get("me"));
+if(urlMe){ applyPersonSelection(urlMe, true); }
+else { try{ const saved=localStorage.getItem("wc-pool-person"); if(saved&&PMAP[saved]) applyPersonSelection(saved, false); }catch(e){} }
+
+// Optional ?tab= deep link (skip the bracket tab while it's hidden pre-draw).
+const urlTab=PARAMS.get("tab");
+if(["rankings","schedule","groups","bracket"].includes(urlTab)){
+  const tb=document.querySelector('.tab-btn[aria-controls="tab-'+urlTab+'"]');
+  if(tb && tb.style.display!=="none") tb.click();
+}
+updateShareURL(); // normalise the address bar to the resolved state
+
 // Honor whatever the filter selects show (browsers can restore them across reload).
 applyFilters();
 
