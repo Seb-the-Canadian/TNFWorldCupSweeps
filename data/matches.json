@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-15T03:48:52.956Z",
+  "fetched_at": "2026-06-15T05:36:16.528Z",
   "matches": [
     {
       "group": "D",
@@ -475,8 +475,8 @@
       "kickoff_local": "06/14/2026 20:00",
       "home_id": "SWE",
       "away_id": "TUN",
-      "status": "live",
-      "home_score": 3,
+      "status": "completed",
+      "home_score": 5,
       "away_score": 1,
       "home_pen": null,
       "away_pen": null,
