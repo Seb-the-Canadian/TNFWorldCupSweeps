@@ -40,8 +40,14 @@ civil-war countdown, conviction signal). Phased to ship value early and de-risk 
       scores/LIVE/FT overlay, freshness pill, 60s cache-busted poll), and **live group
       tables** on the Groups tab (position, W-D-L, GD, Pts from results; advancing zones).
       Live-score lag mitigated (cache-bust + optional `LIVE_DISPATCH_PAT` near-live chain).
-- [ ] **Phase C — Probabilities & analytics.** Polymarket Gamma adapter → `probabilities.json`
-      + `pool-stats.json`; daily history snapshots; momentum, trajectory chart, conviction signal.
+- [~] **Phase C — Probabilities & analytics.** *Odds momentum shipped (defensive-first), pending
+      first-run verification:* `scripts/fetch-odds.js` (Polymarket Gamma, tolerant parsing) →
+      `data/probabilities.json`; the Odds sub-view shows live market-implied combined probability
+      + 24h momentum + a movers strip, degrading to the static blend when absent. *Still to do:*
+      daily history snapshots + a trajectory chart; optional conviction (volume) signal.
+      **First-run check:** Gamma is egress-blocked from dev, so field names are mapped defensively
+      — watch the first Action run; if `fetch-odds` errors with a raw sample, adjust the field
+      picks / aliases and re-run.
 
 **Verify before building Phase C:** Gamma field names on a live `world-cup-winner`
 response; whether a per-team "to advance" market exists; group-winner slugs B–L.
@@ -64,7 +70,8 @@ response; whether a per-team "to advance" market exists; group-winner slugs B–
   Recommended build: deterministic **Tier 1** (clinch/eliminate + next-match requirement)
   + **Tier 2** (live best-third race) first; probabilistic "% to advance" (Tier 3) later.
   Deferred until the rest of the backlog is cleared; placement/fidelity TBD (see doc).
-- **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers, history chart.
+- [~] **Probability momentum & trajectory** *(→ Epic Phase C)* — 24h movers ✅ (Odds sub-view);
+  history-based trajectory chart still to come (needs daily `data/history/*.json` snapshots).
 - [x] **"Today" view** ✅ — Schedule filter "Today / Next Matchday" collapses to the current
   day's matches in the viewer's time zone, or the next match day when today is an off day.
 - [x] **Share / deep links** ✅ — `?me=` & `?tz=` (& `?tab=`) preset the view on load and the
