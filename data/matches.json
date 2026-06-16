@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-16T02:31:12.428Z",
+  "fetched_at": "2026-06-16T03:54:32.041Z",
   "matches": [
     {
       "group": "D",
@@ -939,8 +939,8 @@
       "kickoff_local": "06/15/2026 18:00",
       "home_id": "IRN",
       "away_id": "NZL",
-      "status": "live",
-      "home_score": 1,
+      "status": "completed",
+      "home_score": 2,
       "away_score": 2,
       "home_pen": null,
       "away_pen": null,
