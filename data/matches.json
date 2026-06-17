@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-16T23:39:43.336Z",
+  "fetched_at": "2026-06-17T00:08:45.163Z",
   "matches": [
     {
       "group": "D",
@@ -363,9 +363,9 @@
       "kickoff_local": "06/16/2026 18:00",
       "home_id": "IRQ",
       "away_id": "NOR",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
-      "away_score": 2,
+      "away_score": 4,
       "home_pen": null,
       "away_pen": null,
       "minute": null
