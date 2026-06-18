@@ -1,13 +1,13 @@
 {
   "source": "polymarket",
   "event_slug": "world-cup-winner",
-  "fetched_at": "2026-06-18T14:53:17.236Z",
-  "total_volume_usd": 2613362549.0799947,
+  "fetched_at": "2026-06-18T16:06:43.851Z",
+  "total_volume_usd": 2616437774.9692335,
   "teams": {
     "ESP": {
       "prob": 0.138,
       "change24h": 0.004,
-      "volume": 53423584
+      "volume": 53460954
     },
     "NZL": {
       "prob": 0.001,
@@ -17,22 +17,22 @@
     "SUI": {
       "prob": 0.009,
       "change24h": null,
-      "volume": 52005815
+      "volume": 52053673
     },
     "ENG": {
       "prob": 0.129,
       "change24h": 0.024,
-      "volume": 45544444
+      "volume": 45675068
     },
     "FRA": {
       "prob": 0.185,
       "change24h": null,
-      "volume": 59768436
+      "volume": 59985082
     },
     "KOR": {
       "prob": 0.004,
       "change24h": null,
-      "volume": 80139921
+      "volume": 80277947
     },
     "HAI": {
       "prob": 0.001,
@@ -42,7 +42,7 @@
     "BRA": {
       "prob": 0.067,
       "change24h": null,
-      "volume": 43776119
+      "volume": 43781785
     },
     "JOR": {
       "prob": 0.001,
@@ -52,22 +52,22 @@
     "CUW": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 43822363
+      "volume": 43838363
     },
     "ARG": {
       "prob": 0.118,
-      "change24h": 0.002,
-      "volume": 60171875
+      "change24h": 0.008,
+      "volume": 60220420
     },
     "GER": {
       "prob": 0.057,
       "change24h": null,
-      "volume": 52433276
+      "volume": 52687300
     },
     "COL": {
       "prob": 0.017,
       "change24h": 0.002,
-      "volume": 56751738
+      "volume": 56778738
     },
     "IRN": {
       "prob": 0.001,
@@ -76,73 +76,73 @@
     },
     "POR": {
       "prob": 0.081,
-      "change24h": -0.022,
-      "volume": 55061379
+      "change24h": -0.023,
+      "volume": 55171888
     },
     "GHA": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 51638724
+      "volume": 51755158
     },
     "NED": {
       "prob": 0.04,
-      "change24h": -0.005,
-      "volume": 53049484
+      "change24h": -0.004,
+      "volume": 53114889
     },
     "ALG": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 61822976
+      "volume": 61931955
     },
     "BIH": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 43020796
+      "volume": 43077429
     },
     "USA": {
       "prob": 0.023,
       "change24h": null,
-      "volume": 77275159
+      "volume": 77294332
     },
     "CAN": {
       "prob": 0.003,
       "change24h": null,
-      "volume": 55777234
+      "volume": 55880375
     },
     "TUR": {
       "prob": 0.005,
       "change24h": null,
-      "volume": 56241657
+      "volume": 56285967
     },
     "URU": {
       "prob": 0.007,
       "change24h": null,
-      "volume": 58858168
+      "volume": 58932549
     },
     "MEX": {
       "prob": 0.014,
       "change24h": -0.001,
-      "volume": 71287432
+      "volume": 71387562
     },
     "PAR": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 60794260
+      "volume": 60868480
     },
     "SCO": {
       "prob": 0.003,
       "change24h": null,
-      "volume": 60270708
+      "volume": 60340867
     },
     "JPN": {
       "prob": 0.017,
       "change24h": null,
-      "volume": 58216556
+      "volume": 58241627
     },
     "NOR": {
       "prob": 0.027,
       "change24h": 0.001,
-      "volume": 54861349
+      "volume": 54888117
     },
     "TUN": {
       "prob": 0.001,
@@ -152,7 +152,7 @@
     "ECU": {
       "prob": 0.005,
       "change24h": null,
-      "volume": 59747197
+      "volume": 59820237
     },
     "UZB": {
       "prob": 0.001,
@@ -160,14 +160,14 @@
       "volume": 61307583
     },
     "MAR": {
-      "prob": 0.024,
-      "change24h": null,
-      "volume": 59544792
+      "prob": 0.023,
+      "change24h": -0.001,
+      "volume": 59593147
     },
     "PAN": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 20020300
+      "volume": 20023820
     },
     "IRQ": {
       "prob": 0.001,
@@ -177,72 +177,72 @@
     "RSA": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 39174977
+      "volume": 39175977
     },
     "SEN": {
       "prob": 0.007,
       "change24h": null,
-      "volume": 53016247
+      "volume": 53090577
     },
     "CIV": {
       "prob": 0.006,
       "change24h": null,
-      "volume": 69888262
+      "volume": 70006682
     },
     "COD": {
       "prob": 0.002,
       "change24h": 0.001,
-      "volume": 75495083
+      "volume": 75552651
     },
     "CPV": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 48465864
+      "volume": 48477424
     },
     "CZE": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 54231461
+      "volume": 54748430
     },
     "QAT": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 45013152
+      "volume": 45018152
     },
     "BEL": {
       "prob": 0.017,
       "change24h": null,
-      "volume": 56029061
+      "volume": 56085782
     },
     "AUS": {
       "prob": 0.005,
       "change24h": null,
-      "volume": 68956059
+      "volume": 69034698
     },
     "KSA": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 56297691
+      "volume": 56318714
     },
     "AUT": {
       "prob": 0.005,
       "change24h": null,
-      "volume": 59825835
+      "volume": 59896266
     },
     "CRO": {
       "prob": 0.007,
       "change24h": -0.001,
-      "volume": 62909632
+      "volume": 62937596
     },
     "EGY": {
       "prob": 0.003,
       "change24h": null,
-      "volume": 65361148
+      "volume": 65431108
     },
     "SWE": {
       "prob": 0.006,
       "change24h": null,
-      "volume": 47756386
+      "volume": 47831321
     }
   }
 }
