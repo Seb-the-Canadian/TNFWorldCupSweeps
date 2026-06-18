@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-18T05:03:10.492Z",
+  "fetched_at": "2026-06-18T19:10:37.188Z",
   "matches": [
     {
       "group": "A",
@@ -411,7 +411,7 @@
       "kickoff_local": "06/18/2026 12:00",
       "home_id": "SUI",
       "away_id": "BIH",
-      "status": "scheduled",
+      "status": "live",
       "home_score": 0,
       "away_score": 0,
       "home_pen": null,
@@ -443,9 +443,9 @@
       "kickoff_local": "06/18/2026 12:00",
       "home_id": "CZE",
       "away_id": "RSA",
-      "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "status": "completed",
+      "home_score": 1,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
