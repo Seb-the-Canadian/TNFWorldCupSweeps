@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-19T22:16:33.684Z",
+  "fetched_at": "2026-06-19T23:05:14.309Z",
   "matches": [
     {
       "group": "A",
@@ -460,8 +460,8 @@
       "home_id": "BRA",
       "away_id": "HAI",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -508,8 +508,8 @@
       "home_id": "TUR",
       "away_id": "PAR",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
