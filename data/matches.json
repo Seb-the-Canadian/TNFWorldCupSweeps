@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-20T04:54:03.834Z",
+  "fetched_at": "2026-06-20T06:27:30.635Z",
   "matches": [
     {
       "group": "A",
@@ -507,7 +507,7 @@
       "kickoff_local": "06/19/2026 20:00",
       "home_id": "TUR",
       "away_id": "PAR",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 1,
       "home_pen": null,
