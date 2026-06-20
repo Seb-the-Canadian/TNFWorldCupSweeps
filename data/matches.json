@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-20T17:39:20.754Z",
+  "fetched_at": "2026-06-20T19:14:39.874Z",
   "matches": [
     {
       "group": "A",
@@ -555,9 +555,9 @@
       "kickoff_local": "06/20/2026 12:00",
       "home_id": "NED",
       "away_id": "SWE",
-      "status": "live",
-      "home_score": 2,
-      "away_score": 0,
+      "status": "completed",
+      "home_score": 5,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
