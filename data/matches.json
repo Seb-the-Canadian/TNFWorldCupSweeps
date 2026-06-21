@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-21T07:13:53.620Z",
+  "fetched_at": "2026-06-21T12:05:31.698Z",
   "matches": [
     {
       "group": "A",
@@ -1179,7 +1179,7 @@
       "round": "r32",
       "kickoff_utc": "2026-06-29T20:30:00.000Z",
       "kickoff_local": "06/29/2026 16:30",
-      "home_id": null,
+      "home_id": "GER",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
