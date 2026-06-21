@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-21T05:31:48.759Z",
+  "fetched_at": "2026-06-21T07:13:53.620Z",
   "matches": [
     {
       "group": "A",
@@ -571,9 +571,9 @@
       "kickoff_local": "06/20/2026 22:00",
       "home_id": "TUN",
       "away_id": "JPN",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
-      "away_score": 3,
+      "away_score": 4,
       "home_pen": null,
       "away_pen": null,
       "minute": null
