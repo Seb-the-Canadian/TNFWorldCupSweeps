@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-22T21:41:07.829Z",
+  "fetched_at": "2026-06-22T22:22:50.921Z",
   "matches": [
     {
       "group": "A",
@@ -668,8 +668,8 @@
       "home_id": "NOR",
       "away_id": "SEN",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -700,8 +700,8 @@
       "home_id": "JOR",
       "away_id": "ALG",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
