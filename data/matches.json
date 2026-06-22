@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-22T11:49:47.747Z",
+  "fetched_at": "2026-06-22T13:44:55.983Z",
   "matches": [
     {
       "group": "A",
@@ -652,8 +652,8 @@
       "home_id": "FRA",
       "away_id": "IRQ",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -684,8 +684,8 @@
       "home_id": "ARG",
       "away_id": "AUT",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
