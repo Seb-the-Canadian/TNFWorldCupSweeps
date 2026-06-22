@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-21T23:52:18.536Z",
+  "fetched_at": "2026-06-22T00:21:14.254Z",
   "matches": [
     {
       "group": "A",
@@ -635,7 +635,7 @@
       "kickoff_local": "06/21/2026 18:00",
       "home_id": "URU",
       "away_id": "CPV",
-      "status": "live",
+      "status": "completed",
       "home_score": 2,
       "away_score": 2,
       "home_pen": null,
