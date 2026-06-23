@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-23T04:45:45.991Z",
+  "fetched_at": "2026-06-23T06:14:58.053Z",
   "matches": [
     {
       "group": "A",
@@ -699,9 +699,9 @@
       "kickoff_local": "06/22/2026 20:00",
       "home_id": "JOR",
       "away_id": "ALG",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
-      "away_score": 1,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
