@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-23T21:30:09.919Z",
+  "fetched_at": "2026-06-23T22:02:34.165Z",
   "matches": [
     {
       "group": "A",
@@ -763,7 +763,7 @@
       "kickoff_local": "06/23/2026 16:00",
       "home_id": "ENG",
       "away_id": "GHA",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 0,
       "home_pen": null,
