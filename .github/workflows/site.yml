@@ -48,9 +48,19 @@ jobs:
           echo "active=$active" >> "$GITHUB_OUTPUT"
 
       - name: Refresh match data
+        id: refresh
         if: github.event_name != 'push' && steps.guard.outputs.active == 'true'
         continue-on-error: true   # a feed/adapter failure must not block deploying the site
         run: node scripts/refresh.js
+
+      # continue-on-error keeps the deploy unblocked, but a swallowed failure must not be
+      # invisible — a sustained feed outage would otherwise leave every run green. Surface it
+      # loudly (annotation + job summary) while still serving last-good data.
+      - name: Flag a swallowed refresh failure
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo "::warning title=Live data refresh failed::scripts/refresh.js exited non-zero — the match feed/adapter likely failed. Serving last-good data; the deploy still proceeds."
+          echo "⚠️ **Live data refresh failed** — match feed/adapter error; serving last-good data (deploy still proceeded). Check the *Refresh match data* step log." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit data if it changed
         id: commit

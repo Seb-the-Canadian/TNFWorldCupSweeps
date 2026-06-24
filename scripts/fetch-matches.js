@@ -163,7 +163,9 @@ function normalizeMatch(raw, ctx) {
 }
 
 async function fetchJson(url) {
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  // Bound every upstream call so a hung endpoint can't stall the Action until the 6h job
+  // timeout — a timeout surfaces as a normal fetch error the callers already handle.
+  const res = await fetch(url, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`upstream HTTP ${res.status} for ${url}`);
   return res.json();
 }

@@ -13,8 +13,9 @@ committed to `data/` by a scheduled GitHub Action.
 - **Rankings** — two sub-views with a description box each: **Live Points** (default —
   each participant's running sum of their two teams' match points, win 3 / draw 1 /
   loss 0; knockout shoot-out wins count as wins) and **Odds** — live market-implied win
-  probability (Polymarket) with 24h momentum + a "movers" strip when available, otherwise
-  the fixed pre-tournament sportsbook blend.
+  probability (Polymarket) shown with its variance vs the pre-tournament blend (a per-row
+  chip + a "movers" strip) and a trajectory sparkline from daily history, when available;
+  otherwise the fixed pre-tournament sportsbook blend.
 - **Bracket** — Round-of-32 → Final, owner-coloured. The tab stays hidden while every
   slot is TBD (it'd be empty pre-draw) and reveals itself automatically once the group
   stage resolves (Jun 27), filling in as teams qualify, including penalty results.
