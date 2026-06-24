@@ -73,6 +73,26 @@ secret named **`LIVE_DISPATCH_PAT`**. When present, each run re-dispatches itsel
 match is live (and stops automatically when none is), bypassing the cron throttle. Without
 the secret the workflow simply relies on cron — no errors either way.
 
+## Operations
+
+Two one-time setups make the live site more robust during the tournament. Both are **account/repo
+settings you apply yourself** (they can't be committed):
+
+1. **Get pinged when a deploy fails.** A broken deploy otherwise stays silent until someone checks
+   the Actions tab. On GitHub: **your avatar → Settings → Notifications → Actions → enable "Send
+   notifications for failed workflows only"**. Now a failed `Build, refresh & deploy` run emails you
+   immediately.
+2. **Near-live scores (`LIVE_DISPATCH_PAT`).** Without this secret, live scores lag the cron by
+   ~30–40 min. To enable the ~2-minute refresh chain (see *Near-live updates during matches* above):
+   create a **fine-grained Personal Access Token** scoped to *this repo only* with **Actions:
+   Read and write**, then add it under **Settings → Secrets and variables → Actions → New repository
+   secret**, named exactly **`LIVE_DISPATCH_PAT`**. Trade-off: a PAT is a standing credential — scope
+   it to this repo and set a sensible expiry. Leaving it unset is fine; the site just relies on cron.
+
+> The deploy itself is guarded: the workflow warns loudly if **Settings → Pages → Source** ever drifts
+> off **GitHub Actions** (the setting that caused an earlier deploy outage), so a regression surfaces
+> in the run log instead of silently breaking deploys.
+
 ## Editing the data
 
 All pool data lives in plain JavaScript objects near the top of the `<script>` block in

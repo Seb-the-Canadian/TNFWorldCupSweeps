@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       # ── Data refresh (schedule/manual only; skipped on plain pushes) ──
       - name: Live-window guard
@@ -101,6 +101,18 @@ jobs:
         if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         with:
           path: _site
+
+      # The original outage was a repo *setting* drifting out of sync with this workflow:
+      # Pages "Deploy from a branch" (legacy) racing this Actions deploy for the single Pages
+      # lock. Settings aren't version-controlled, so warn loudly (never block) if it regresses.
+      - name: Assert Pages uses the Actions builder
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bt=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .build_type 2>/dev/null || echo unknown)
+          [ "$bt" = "workflow" ] || echo "::warning title=Pages source drifted::build_type='$bt' (expected 'workflow'); the legacy builder will race this deploy — set Settings → Pages → Source to GitHub Actions (see README)."
+
       - id: deploy
         if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
         uses: actions/deploy-pages@v4
