@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-24T00:44:15.291Z",
+  "fetched_at": "2026-06-24T01:27:26.228Z",
   "matches": [
     {
       "group": "A",
@@ -731,7 +731,7 @@
       "kickoff_local": "06/23/2026 19:00",
       "home_id": "PAN",
       "away_id": "CRO",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 1,
       "home_pen": null,
