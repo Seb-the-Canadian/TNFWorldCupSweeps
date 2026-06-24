@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-24T20:44:29.576Z",
+  "fetched_at": "2026-06-24T21:16:16.650Z",
   "matches": [
     {
       "group": "D",
@@ -587,7 +587,7 @@
       "kickoff_local": "06/24/2026 12:00",
       "home_id": "BIH",
       "away_id": "QAT",
-      "status": "live",
+      "status": "completed",
       "home_score": 3,
       "away_score": 1,
       "home_pen": null,
@@ -1115,7 +1115,7 @@
       "kickoff_local": "06/24/2026 12:00",
       "home_id": "SUI",
       "away_id": "CAN",
-      "status": "live",
+      "status": "completed",
       "home_score": 2,
       "away_score": 1,
       "home_pen": null,
