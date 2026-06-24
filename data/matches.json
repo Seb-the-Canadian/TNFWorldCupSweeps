@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-24T03:42:50.643Z",
+  "fetched_at": "2026-06-24T05:08:44.599Z",
   "matches": [
     {
       "group": "A",
@@ -747,7 +747,7 @@
       "kickoff_local": "06/23/2026 20:00",
       "home_id": "COL",
       "away_id": "COD",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
       "away_score": 0,
       "home_pen": null,
