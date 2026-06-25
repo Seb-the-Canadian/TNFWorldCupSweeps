@@ -34,7 +34,7 @@ function asArray(x) {                       // outcomes/outcomePrices come back 
   if (typeof x === "string") { try { const a = JSON.parse(x); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   return [];
 }
-async function fetchJson(url) { const r = await fetch(url, { headers: { Accept: "application/json" } }); if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.json(); }
+async function fetchJson(url) { const r = await fetch(url, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(15000) }); if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.json(); }
 
 function teamNameOf(m) {
   let name = pick(m, ["groupItemTitle", "group_item_title", "groupTitle", "title"]);
