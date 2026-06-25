@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-25T08:39:19.838Z",
+  "fetched_at": "2026-06-25T13:26:11.213Z",
   "matches": [
     {
       "group": "D",
@@ -1020,8 +1020,8 @@
       "home_id": "CUW",
       "away_id": "CIV",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -1036,8 +1036,8 @@
       "home_id": "ECU",
       "away_id": "GER",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
