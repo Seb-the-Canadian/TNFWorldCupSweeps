@@ -224,6 +224,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .mom.up{color:#4ade80}
 .mom.down{color:#f87171}
 .mom .lucide{width:12px;height:12px}
+.mom-unit{font-size:8px;font-weight:700;opacity:.55;margin-left:2px;text-transform:uppercase;letter-spacing:.02em}
 .movers{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 12px;margin-bottom:12px;
   background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:11px}
 .movers-label{font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-size:10px}
@@ -731,10 +732,15 @@ function buildRankings(){
   const pre = id => prob(id);                                              // pre-tournament blended %
   const pr  = id => live ? ((ODDS.teams[id]? +ODDS.teams[id].prob : 0)*100) : pre(id); // current %
   const teamVar = id => (live && ODDS.teams[id]) ? (pr(id)-pre(id)) : 0;   // variance vs pre-tournament
+  // 24h market momentum from Polymarket's price delta (0..1 → pts). Null — NOT 0 — when the feed
+  // has no 24h figure for a team, so "no data" never masquerades as "no movement".
+  const mom = id => (live && ODDS.teams[id] && ODDS.teams[id].change24h != null) ? +ODDS.teams[id].change24h*100 : null;
+  const pairMom = (a,b) => { const xs=[mom(a),mom(b)].filter(v=>v!=null); return xs.length ? xs.reduce((s,v)=>s+v,0) : null; };
+  const fmt1 = v => (v>=0?"+":"")+v.toFixed(1);
 
   const ranked = POOL.map(p=>{
     const [t1,t2]=p.teams;
-    return {name:p.name,color:p.color,t1,t2,p1:pr(t1),p2:pr(t2),total:pr(t1)+pr(t2),varc:(pr(t1)+pr(t2))-(pre(t1)+pre(t2))};
+    return {name:p.name,color:p.color,t1,t2,p1:pr(t1),p2:pr(t2),total:pr(t1)+pr(t2),varc:(pr(t1)+pr(t2))-(pre(t1)+pre(t2)),mom24:pairMom(t1,t2)};
   }).sort((a,b)=>b.total-a.total);
   const max=(ranked[0]&&ranked[0].total)||1;
 
@@ -745,11 +751,15 @@ function buildRankings(){
     if(t>=0.8)return {label:"Underdog",  bg:"rgba(249,115,22,.12)", col:"#fb923c"};
     return           {label:"Long Shot", bg:"rgba(239,68,68,.12)",  col:"#f87171"};
   }
-  // Variance chip: how far this participant's current market odds have moved from their
-  // pre-tournament baseline (▲ drifted in / ▼ drifted out).
-  const varChip = v => {
-    const up=v>=0, s=(up?"+":"")+v.toFixed(1);
-    return `<div class="mom ${up?"up":"down"}" title="variance vs pre-tournament odds"><i data-lucide="${up?"trending-up":"trending-down"}"></i>${s}</div>`;
+  // Per-row signal chip. Prefer the live 24h market move (the fresher signal); when the feed has no
+  // 24h figure for this pair, fall back to the variance-vs-pre-tournament drift. A small unit tag
+  // (24h / vs pre) labels which one is shown so the two are never confused.
+  const signalChip = r => {
+    const use24 = r.mom24!=null, v = use24 ? r.mom24 : r.varc, up = v>=0;
+    const tag = use24 ? "24h" : "vs pre";
+    const title = use24 ? `24h market move (Polymarket); ${fmt1(r.varc)} vs pre-tournament`
+                        : "variance vs pre-tournament odds (no 24h figure yet)";
+    return `<div class="mom ${up?"up":"down"}" title="${title}"><i data-lucide="${up?"trending-up":"trending-down"}"></i>${fmt1(v)}<span class="mom-unit">${tag}</span></div>`;
   };
 
   // Trajectory sparkline (combined prob over days) when we have ≥2 days of history; else the bar.
@@ -759,18 +769,20 @@ function buildRankings(){
     ? `<div class="spark-wrap" title="${histDays.length}-day trajectory">${sparkline(histDays.map(d=>(d.teams[r.t1]||0)+(d.teams[r.t2]||0)), r.color)}</div>`
     : `<div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.total/max*100).toFixed(1)}%;background:${r.color}"></div></div>`;
 
-  // "Movers" strip — biggest pool-team variance vs the pre-tournament line, when live.
-  let strip="";
-  if(live){
-    const moves=[...new Set(POOL.flatMap(p=>p.teams))].map(id=>({id,c:teamVar(id)}))
-      .filter(x=>Math.abs(x.c)>=0.2).sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)).slice(0,5);
-    if(moves.length) strip=`<div class="movers"><span class="movers-label">Vs pre-tournament</span>`+
-      moves.map(m=>`<span class="mv ${m.c>=0?"up":"down"}">${esc(teamName(m.id))} ${(m.c>=0?"+":"")+m.c.toFixed(1)}</span>`).join("")+`</div>`;
-  }
+  // "Movers" strips — biggest pool-team moves, when live. The 24h strip (fresher) renders first and
+  // only when the feed actually has 24h data; the variance-vs-pre strip is always available.
+  const moversStrip = (label, pick) => {
+    const moves=[...new Set(POOL.flatMap(p=>p.teams))].map(id=>({id,c:pick(id)}))
+      .filter(x=>x.c!=null && Math.abs(x.c)>=0.2).sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)).slice(0,5);
+    return moves.length ? `<div class="movers"><span class="movers-label">${label}</span>`+
+      moves.map(m=>`<span class="mv ${m.c>=0?"up":"down"}">${esc(teamName(m.id))} ${fmt1(m.c)}</span>`).join("")+`</div>` : "";
+  };
+  const strip24 = live ? moversStrip("Last 24h", mom) : "";
+  const strip   = live ? moversStrip("Vs pre-tournament", teamVar) : "";
 
   const rows = ranked.map((r,i)=>{
     const t=tier(r.total), topCls=i<3?"top":"";
-    const lastCol = live ? varChip(r.varc) : `<div class="tier-badge" style="background:${t.bg};color:${t.col}">${t.label}</div>`;
+    const lastCol = live ? signalChip(r) : `<div class="tier-badge" style="background:${t.bg};color:${t.col}">${t.label}</div>`;
     return `<div class="rank-row" data-person="${esc(r.name)}" title="${esc(teamName(r.t1))}: ${r.p1.toFixed(2)}% | ${esc(teamName(r.t2))}: ${r.p2.toFixed(2)}%">
       <div class="rank-num ${topCls}">#${i+1}</div>
       <div class="rank-dot" style="background:${r.color}"></div>
@@ -781,11 +793,11 @@ function buildRankings(){
       <div class="rank-pct" style="color:${r.color}">${r.total.toFixed(1)}%</div>
     </div>`;
   }).join("");
-  document.getElementById("rankings-list").innerHTML = strip + rows;
+  document.getElementById("rankings-list").innerHTML = strip24 + strip + rows;
 
   const desc=document.getElementById("odds-desc");
   if(desc) desc.innerHTML = live
-    ? `<strong>Odds</strong> — each participant's combined win probability implied by live Polymarket trading${ODDS.fetched_at?` (updated ${esc(timeAgo(ODDS.fetched_at))})`:""}. The <span style="color:#4ade80">▲</span>/<span style="color:#f87171">▼</span> is the <strong>variance vs the pre-tournament odds</strong> — how far each team has drifted from the blended sportsbook line it opened at${canSpark?"; the spark shows its recent trajectory":""}.`
+    ? `<strong>Odds</strong> — each participant's combined win probability implied by live Polymarket trading${ODDS.fetched_at?` (updated ${esc(timeAgo(ODDS.fetched_at))})`:""}. The <span style="color:#4ade80">▲</span>/<span style="color:#f87171">▼</span> chip shows each pair's <strong>24h market move</strong> (tagged <em>24h</em>) when the market reports one, otherwise its <strong>variance vs the pre-tournament odds</strong> (tagged <em>vs pre</em>)${canSpark?"; the spark shows its recent trajectory":""}.`
     : `<strong>Odds</strong> — each participant's combined outright tournament-winner probability, from blended pre-tournament sportsbook odds (FanDuel / Fox / NBC / CBS). Once live market data loads, this becomes the current market odds with variance shown vs this pre-tournament baseline.`;
   document.querySelectorAll("#rankings-list .rank-row").forEach(row=>row.classList.toggle("selected-me", row.dataset.person===SELECTED));
   drawIcons();
