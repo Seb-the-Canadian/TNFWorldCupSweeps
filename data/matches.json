@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-25T22:01:21.224Z",
+  "fetched_at": "2026-06-25T22:39:16.566Z",
   "matches": [
     {
       "group": "D",
@@ -1132,8 +1132,8 @@
       "home_id": "PAR",
       "away_id": "AUS",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
