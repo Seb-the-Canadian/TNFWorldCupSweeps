@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-24T23:46:39.506Z",
+  "fetched_at": "2026-06-25T00:16:47.941Z",
   "matches": [
     {
       "group": "D",
@@ -411,8 +411,8 @@
       "kickoff_local": "06/24/2026 18:00",
       "home_id": "MAR",
       "away_id": "HAI",
-      "status": "live",
-      "home_score": 3,
+      "status": "completed",
+      "home_score": 4,
       "away_score": 2,
       "home_pen": null,
       "away_pen": null,
@@ -571,7 +571,7 @@
       "kickoff_local": "06/24/2026 18:00",
       "home_id": "SCO",
       "away_id": "BRA",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 3,
       "home_pen": null,
