@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-25T03:24:39.855Z",
+  "fetched_at": "2026-06-25T08:39:19.838Z",
   "matches": [
     {
       "group": "D",
@@ -1291,7 +1291,7 @@
       "round": "r32",
       "kickoff_utc": "2026-06-29T17:00:00.000Z",
       "kickoff_local": "06/29/2026 12:00",
-      "home_id": null,
+      "home_id": "BRA",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
@@ -1371,7 +1371,7 @@
       "round": "r32",
       "kickoff_utc": "2026-06-28T19:00:00.000Z",
       "kickoff_local": "06/28/2026 12:00",
-      "home_id": null,
+      "home_id": "RSA",
       "away_id": "CAN",
       "status": "scheduled",
       "home_score": 0,
@@ -1564,7 +1564,7 @@
       "kickoff_utc": "2026-06-30T01:00:00.000Z",
       "kickoff_local": "06/29/2026 19:00",
       "home_id": null,
-      "away_id": null,
+      "away_id": "MAR",
       "status": "scheduled",
       "home_score": 0,
       "away_score": 0,
