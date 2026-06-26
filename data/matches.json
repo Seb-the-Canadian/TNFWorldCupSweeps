@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-26T20:21:53.126Z",
+  "fetched_at": "2026-06-26T20:59:40.097Z",
   "matches": [
     {
       "group": "D",
@@ -268,7 +268,7 @@
       "home_id": "SEN",
       "away_id": "IRQ",
       "status": "live",
-      "home_score": 1,
+      "home_score": 5,
       "away_score": 0,
       "home_pen": null,
       "away_pen": null,
@@ -621,7 +621,7 @@
       "away_id": "FRA",
       "status": "live",
       "home_score": 1,
-      "away_score": 3,
+      "away_score": 4,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -636,8 +636,8 @@
       "home_id": "EGY",
       "away_id": "IRN",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -652,8 +652,8 @@
       "home_id": "CPV",
       "away_id": "KSA",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -668,8 +668,8 @@
       "home_id": "URU",
       "away_id": "ESP",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -1148,8 +1148,8 @@
       "home_id": "NZL",
       "away_id": "BEL",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
