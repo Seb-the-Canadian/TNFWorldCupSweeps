@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-26T02:11:36.585Z",
+  "fetched_at": "2026-06-26T03:25:25.989Z",
   "matches": [
     {
       "group": "D",
@@ -604,8 +604,8 @@
       "home_id": "TUR",
       "away_id": "USA",
       "status": "live",
-      "home_score": 0,
-      "away_score": 1,
+      "home_score": 2,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
