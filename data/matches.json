@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-26T15:32:41.676Z",
+  "fetched_at": "2026-06-26T19:42:46.236Z",
   "matches": [
     {
       "group": "D",
@@ -267,9 +267,9 @@
       "kickoff_local": "06/26/2026 15:00",
       "home_id": "SEN",
       "away_id": "IRQ",
-      "status": "scheduled",
-      "home_score": null,
-      "away_score": null,
+      "status": "live",
+      "home_score": 1,
+      "away_score": 0,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -619,9 +619,9 @@
       "kickoff_local": "06/26/2026 15:00",
       "home_id": "NOR",
       "away_id": "FRA",
-      "status": "scheduled",
-      "home_score": null,
-      "away_score": null,
+      "status": "live",
+      "home_score": 1,
+      "away_score": 3,
       "home_pen": null,
       "away_pen": null,
       "minute": null
