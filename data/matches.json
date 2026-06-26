@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-26T00:12:13.585Z",
+  "fetched_at": "2026-06-26T01:21:36.047Z",
   "matches": [
     {
       "group": "D",
@@ -123,9 +123,9 @@
       "kickoff_local": "06/25/2026 18:00",
       "home_id": "JPN",
       "away_id": "SWE",
-      "status": "live",
-      "home_score": 0,
-      "away_score": 0,
+      "status": "completed",
+      "home_score": 1,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -251,9 +251,9 @@
       "kickoff_local": "06/25/2026 18:00",
       "home_id": "TUN",
       "away_id": "NED",
-      "status": "live",
-      "home_score": 0,
-      "away_score": 2,
+      "status": "completed",
+      "home_score": 1,
+      "away_score": 3,
       "home_pen": null,
       "away_pen": null,
       "minute": null
