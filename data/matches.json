@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-27T22:50:08.481Z",
+  "fetched_at": "2026-06-27T23:15:57.750Z",
   "matches": [
     {
       "group": "D",
@@ -283,7 +283,7 @@
       "kickoff_local": "06/27/2026 17:00",
       "home_id": "PAN",
       "away_id": "ENG",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 2,
       "home_pen": null,
@@ -1051,7 +1051,7 @@
       "kickoff_local": "06/27/2026 17:00",
       "home_id": "CRO",
       "away_id": "GHA",
-      "status": "live",
+      "status": "completed",
       "home_score": 2,
       "away_score": 1,
       "home_pen": null,
