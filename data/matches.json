@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-27T01:58:23.172Z",
+  "fetched_at": "2026-06-27T03:18:44.693Z",
   "matches": [
     {
       "group": "D",
@@ -635,9 +635,9 @@
       "kickoff_local": "06/26/2026 20:00",
       "home_id": "EGY",
       "away_id": "IRN",
-      "status": "scheduled",
-      "home_score": null,
-      "away_score": null,
+      "status": "live",
+      "home_score": 1,
+      "away_score": 1,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -651,7 +651,7 @@
       "kickoff_local": "06/26/2026 19:00",
       "home_id": "CPV",
       "away_id": "KSA",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 0,
       "home_pen": null,
@@ -667,7 +667,7 @@
       "kickoff_local": "06/26/2026 18:00",
       "home_id": "URU",
       "away_id": "ESP",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 1,
       "home_pen": null,
@@ -1147,9 +1147,9 @@
       "kickoff_local": "06/26/2026 20:00",
       "home_id": "NZL",
       "away_id": "BEL",
-      "status": "scheduled",
-      "home_score": null,
-      "away_score": null,
+      "status": "live",
+      "home_score": 0,
+      "away_score": 0,
       "home_pen": null,
       "away_pen": null,
       "minute": null
