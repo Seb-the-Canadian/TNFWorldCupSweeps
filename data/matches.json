@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-28T06:35:32.693Z",
+  "fetched_at": "2026-06-28T15:41:45.919Z",
   "matches": [
     {
       "group": "D",
@@ -1374,8 +1374,8 @@
       "home_id": "RSA",
       "away_id": "CAN",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
