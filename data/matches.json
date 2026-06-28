@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-28T00:06:58.918Z",
+  "fetched_at": "2026-06-28T01:21:07.897Z",
   "matches": [
     {
       "group": "D",
@@ -300,7 +300,7 @@
       "home_id": "COD",
       "away_id": "UZB",
       "status": "live",
-      "home_score": 0,
+      "home_score": 2,
       "away_score": 1,
       "home_pen": null,
       "away_pen": null,
