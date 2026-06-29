@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-28T21:06:43.933Z",
+  "fetched_at": "2026-06-29T07:00:55.085Z",
   "matches": [
     {
       "group": "D",
@@ -1419,7 +1419,7 @@
       "round": "r16",
       "kickoff_utc": "2026-07-04T17:00:00.000Z",
       "kickoff_local": "07/04/2026 12:00",
-      "home_id": null,
+      "home_id": "RSA",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
