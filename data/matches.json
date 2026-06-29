@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-29T21:32:02.873Z",
+  "fetched_at": "2026-06-29T22:00:31.357Z",
   "matches": [
     {
       "group": "D",
@@ -1518,7 +1518,7 @@
       "home_id": "GER",
       "away_id": "PAR",
       "status": "live",
-      "home_score": 0,
+      "home_score": 1,
       "away_score": 1,
       "home_pen": null,
       "away_pen": null,
