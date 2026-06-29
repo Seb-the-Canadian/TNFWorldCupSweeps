@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-29T23:21:59.197Z",
+  "fetched_at": "2026-06-29T23:45:40.833Z",
   "matches": [
     {
       "group": "D",
@@ -1517,7 +1517,7 @@
       "kickoff_local": "06/29/2026 16:30",
       "home_id": "GER",
       "away_id": "PAR",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
       "away_score": 1,
       "home_pen": null,
@@ -1643,7 +1643,7 @@
       "round": "r16",
       "kickoff_utc": "2026-07-04T21:00:00.000Z",
       "kickoff_local": "07/04/2026 17:00",
-      "home_id": null,
+      "home_id": "PAR",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
