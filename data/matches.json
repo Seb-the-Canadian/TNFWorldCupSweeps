@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-29T18:08:03.626Z",
+  "fetched_at": "2026-06-29T18:54:27.555Z",
   "matches": [
     {
       "group": "D",
@@ -1294,7 +1294,7 @@
       "home_id": "BRA",
       "away_id": "JPN",
       "status": "live",
-      "home_score": 0,
+      "home_score": 1,
       "away_score": 1,
       "home_pen": null,
       "away_pen": null,
