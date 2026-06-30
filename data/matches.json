@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-30T22:38:00.184Z",
+  "fetched_at": "2026-06-30T23:05:34.003Z",
   "matches": [
     {
       "group": "D",
@@ -1389,7 +1389,7 @@
       "kickoff_local": "06/30/2026 17:00",
       "home_id": "FRA",
       "away_id": "SWE",
-      "status": "live",
+      "status": "completed",
       "home_score": 3,
       "away_score": 0,
       "home_pen": null,
@@ -1644,7 +1644,7 @@
       "kickoff_utc": "2026-07-04T21:00:00.000Z",
       "kickoff_local": "07/04/2026 17:00",
       "home_id": "PAR",
-      "away_id": null,
+      "away_id": "FRA",
       "status": "scheduled",
       "home_score": 0,
       "away_score": 0,
