@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-06-30T18:48:59.776Z",
+  "fetched_at": "2026-06-30T19:25:25.465Z",
   "matches": [
     {
       "group": "D",
@@ -1468,7 +1468,7 @@
       "kickoff_utc": "2026-07-05T20:00:00.000Z",
       "kickoff_local": "07/05/2026 16:00",
       "home_id": "BRA",
-      "away_id": null,
+      "away_id": "NOR",
       "status": "scheduled",
       "home_score": 0,
       "away_score": 0,
@@ -1581,7 +1581,7 @@
       "kickoff_local": "06/30/2026 12:00",
       "home_id": "CIV",
       "away_id": "NOR",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
       "away_score": 2,
       "home_pen": null,
