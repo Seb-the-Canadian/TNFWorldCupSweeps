@@ -1,148 +1,148 @@
 {
   "source": "polymarket",
   "event_slug": "world-cup-winner",
-  "fetched_at": "2026-06-30T16:29:44.666Z",
-  "total_volume_usd": 3541331481.3073545,
+  "fetched_at": "2026-06-30T17:15:03.191Z",
+  "total_volume_usd": 3543060166.4483614,
   "teams": {
     "ESP": {
       "prob": 0.114,
       "change24h": 0.002,
-      "volume": 72301886
+      "volume": 72312858
     },
     "SUI": {
       "prob": 0.009,
-      "change24h": -0.001,
-      "volume": 78262608
+      "change24h": null,
+      "volume": 78263145
     },
     "ENG": {
       "prob": 0.1,
       "change24h": -0.003,
-      "volume": 65373714
+      "volume": 65486781
     },
     "FRA": {
       "prob": 0.281,
-      "change24h": 0.046,
-      "volume": 82204315
+      "change24h": 0.045,
+      "volume": 82249410
     },
     "BRA": {
       "prob": 0.071,
-      "change24h": 0.011,
-      "volume": 68883189
+      "change24h": 0.01,
+      "volume": 68918904
     },
     "ARG": {
       "prob": 0.194,
-      "change24h": -0.013,
-      "volume": 86049381
+      "change24h": -0.015,
+      "volume": 86119854
     },
     "COL": {
       "prob": 0.028,
       "change24h": 0.003,
-      "volume": 82460908
+      "volume": 82484822
     },
     "POR": {
-      "prob": 0.06,
-      "change24h": 0.001,
-      "volume": 83256441
+      "prob": 0.065,
+      "change24h": 0.006,
+      "volume": 83305989
     },
     "GHA": {
       "prob": 0.001,
-      "change24h": 0,
-      "volume": 76223875
+      "change24h": null,
+      "volume": 76224875
     },
     "ALG": {
       "prob": 0.002,
-      "change24h": null,
-      "volume": 83266341
+      "change24h": 0.001,
+      "volume": 83292070
     },
     "BIH": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 62303726
+      "volume": 62361586
     },
     "USA": {
       "prob": 0.028,
       "change24h": 0.004,
-      "volume": 113832287
+      "volume": 113842933
     },
     "CAN": {
       "prob": 0.003,
       "change24h": null,
-      "volume": 90788672
+      "volume": 90791394
     },
     "MEX": {
       "prob": 0.017,
       "change24h": 0.005,
-      "volume": 107323254
+      "volume": 107662181
     },
     "PAR": {
       "prob": 0.003,
       "change24h": 0.002,
-      "volume": 90230419
+      "volume": 90234264
     },
     "NOR": {
-      "prob": 0.021,
-      "change24h": 0.002,
-      "volume": 80430765
+      "prob": 0.022,
+      "change24h": 0.003,
+      "volume": 80557088
     },
     "ECU": {
       "prob": 0.006,
       "change24h": null,
-      "volume": 93682654
+      "volume": 93705637
     },
     "MAR": {
       "prob": 0.038,
-      "change24h": 0.024,
-      "volume": 100529593
+      "change24h": 0.025,
+      "volume": 100579556
     },
     "SEN": {
       "prob": 0.005,
       "change24h": null,
-      "volume": 72151382
+      "volume": 72158382
     },
     "CIV": {
-      "prob": 0.004,
-      "change24h": 0.001,
-      "volume": 107674889
+      "prob": 0.003,
+      "change24h": null,
+      "volume": 108007916
     },
     "COD": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 89820947
+      "volume": 89835787
     },
     "CPV": {
       "prob": 0.001,
       "change24h": null,
-      "volume": 90115649
+      "volume": 90155566
     },
     "BEL": {
-      "prob": 0.014,
-      "change24h": null,
-      "volume": 84260044
+      "prob": 0.013,
+      "change24h": -0.001,
+      "volume": 84354893
     },
     "AUS": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 78763776
+      "volume": 78764787
     },
     "AUT": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 78805015
+      "volume": 78860741
     },
     "CRO": {
       "prob": 0.005,
       "change24h": 0.001,
-      "volume": 95871061
+      "volume": 95886001
     },
     "EGY": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 99733114
+      "volume": 99944257
     },
     "SWE": {
       "prob": 0.002,
       "change24h": null,
-      "volume": 73043226
+      "volume": 73072543
     }
   }
 }
