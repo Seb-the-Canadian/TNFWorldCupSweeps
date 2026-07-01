@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-01T20:51:54.316Z",
+  "fetched_at": "2026-07-01T21:25:45.556Z",
   "matches": [
     {
       "group": "A",
@@ -1311,7 +1311,7 @@
       "away_id": "SEN",
       "status": "live",
       "home_score": 0,
-      "away_score": 1,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
