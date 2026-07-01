@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-01T03:24:22.492Z",
+  "fetched_at": "2026-07-01T05:00:44.895Z",
   "matches": [
     {
       "group": "D",
@@ -1435,7 +1435,7 @@
       "round": "r16",
       "kickoff_utc": "2026-07-06T00:00:00.000Z",
       "kickoff_local": "07/05/2026 18:00",
-      "home_id": null,
+      "home_id": "MEX",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
@@ -1597,7 +1597,7 @@
       "kickoff_local": "06/30/2026 19:00",
       "home_id": "MEX",
       "away_id": "ECU",
-      "status": "live",
+      "status": "completed",
       "home_score": 2,
       "away_score": 0,
       "home_pen": null,
