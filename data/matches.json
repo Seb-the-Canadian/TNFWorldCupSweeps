@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-01T05:00:44.895Z",
+  "fetched_at": "2026-07-01T12:43:11.049Z",
   "matches": [
     {
       "group": "D",
@@ -1614,8 +1614,8 @@
       "home_id": "ENG",
       "away_id": "COD",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -1630,8 +1630,8 @@
       "home_id": "BEL",
       "away_id": "SEN",
       "status": "scheduled",
-      "home_score": 0,
-      "away_score": 0,
+      "home_score": null,
+      "away_score": null,
       "home_pen": null,
       "away_pen": null,
       "minute": null
