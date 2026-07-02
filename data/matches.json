@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-02T20:31:44.257Z",
+  "fetched_at": "2026-07-02T20:56:33.324Z",
   "matches": [
     {
       "group": "A",
@@ -1342,7 +1342,7 @@
       "home_id": "ESP",
       "away_id": "AUT",
       "status": "live",
-      "home_score": 2,
+      "home_score": 3,
       "away_score": 0,
       "home_pen": null,
       "away_pen": null,
