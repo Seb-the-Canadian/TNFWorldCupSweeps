@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-03T20:50:14.375Z",
+  "fetched_at": "2026-07-03T21:19:28.758Z",
   "matches": [
     {
       "group": "A",
@@ -1405,7 +1405,7 @@
       "kickoff_local": "07/03/2026 13:00",
       "home_id": "AUS",
       "away_id": "EGY",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
       "away_score": 1,
       "home_pen": null,
@@ -1516,7 +1516,7 @@
       "kickoff_utc": "2026-07-07T16:00:00.000Z",
       "kickoff_local": "07/07/2026 12:00",
       "home_id": null,
-      "away_id": null,
+      "away_id": "EGY",
       "status": "scheduled",
       "home_score": 0,
       "away_score": 0,
