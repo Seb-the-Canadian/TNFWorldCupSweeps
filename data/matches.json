@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-03T00:59:37.148Z",
+  "fetched_at": "2026-07-03T01:42:09.223Z",
   "matches": [
     {
       "group": "A",
@@ -1325,7 +1325,7 @@
       "kickoff_local": "07/02/2026 19:00",
       "home_id": "POR",
       "away_id": "CRO",
-      "status": "live",
+      "status": "completed",
       "home_score": 2,
       "away_score": 1,
       "home_pen": null,
@@ -1483,7 +1483,7 @@
       "round": "r16",
       "kickoff_utc": "2026-07-06T19:00:00.000Z",
       "kickoff_local": "07/06/2026 14:00",
-      "home_id": null,
+      "home_id": "POR",
       "away_id": "ESP",
       "status": "scheduled",
       "home_score": 0,
