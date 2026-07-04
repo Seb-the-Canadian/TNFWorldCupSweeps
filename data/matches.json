@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-04T03:29:00.305Z",
+  "fetched_at": "2026-07-04T04:46:53.578Z",
   "matches": [
     {
       "group": "A",
@@ -1389,7 +1389,7 @@
       "kickoff_local": "07/03/2026 20:30",
       "home_id": "COL",
       "away_id": "GHA",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
       "away_score": 0,
       "home_pen": null,
@@ -1532,7 +1532,7 @@
       "kickoff_utc": "2026-07-07T20:00:00.000Z",
       "kickoff_local": "07/07/2026 13:00",
       "home_id": "SUI",
-      "away_id": null,
+      "away_id": "COL",
       "status": "scheduled",
       "home_score": 0,
       "away_score": 0,
