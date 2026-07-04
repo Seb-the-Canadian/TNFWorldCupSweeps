@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-04T22:58:44.191Z",
+  "fetched_at": "2026-07-04T23:25:34.302Z",
   "matches": [
     {
       "group": "A",
@@ -1421,7 +1421,7 @@
       "kickoff_local": "07/04/2026 17:00",
       "home_id": "PAR",
       "away_id": "FRA",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
       "away_score": 1,
       "home_pen": null,
@@ -1547,7 +1547,7 @@
       "round": "qf",
       "kickoff_utc": "2026-07-09T20:00:00.000Z",
       "kickoff_local": "07/09/2026 16:00",
-      "home_id": null,
+      "home_id": "FRA",
       "away_id": "MAR",
       "status": "scheduled",
       "home_score": 0,
