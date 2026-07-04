@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-04T18:46:08.051Z",
+  "fetched_at": "2026-07-04T19:16:11.047Z",
   "matches": [
     {
       "group": "A",
@@ -1437,9 +1437,9 @@
       "kickoff_local": "07/04/2026 12:00",
       "home_id": "CAN",
       "away_id": "MAR",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
-      "away_score": 1,
+      "away_score": 3,
       "home_pen": null,
       "away_pen": null,
       "minute": null
