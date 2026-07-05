@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-05T21:44:57.253Z",
+  "fetched_at": "2026-07-05T22:10:56.118Z",
   "matches": [
     {
       "group": "A",
@@ -1453,9 +1453,9 @@
       "kickoff_local": "07/05/2026 16:00",
       "home_id": "BRA",
       "away_id": "NOR",
-      "status": "live",
-      "home_score": 0,
-      "away_score": 1,
+      "status": "completed",
+      "home_score": 1,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -1579,7 +1579,7 @@
       "round": "qf",
       "kickoff_utc": "2026-07-11T21:00:00.000Z",
       "kickoff_local": "07/11/2026 17:00",
-      "home_id": null,
+      "home_id": "NOR",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
