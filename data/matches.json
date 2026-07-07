@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-07T17:29:52.831Z",
+  "fetched_at": "2026-07-07T18:17:01.536Z",
   "matches": [
     {
       "group": "A",
@@ -1517,9 +1517,9 @@
       "kickoff_local": "07/07/2026 12:00",
       "home_id": "ARG",
       "away_id": "EGY",
-      "status": "live",
-      "home_score": 0,
-      "away_score": 1,
+      "status": "completed",
+      "home_score": 3,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
@@ -1595,7 +1595,7 @@
       "round": "qf",
       "kickoff_utc": "2026-07-12T01:00:00.000Z",
       "kickoff_local": "07/11/2026 20:00",
-      "home_id": null,
+      "home_id": "ARG",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
