@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-10T02:42:54.314Z",
+  "fetched_at": "2026-07-10T08:04:41.090Z",
   "matches": [
     {
       "group": "A",
@@ -1611,7 +1611,7 @@
       "round": "sf",
       "kickoff_utc": "2026-07-14T19:00:00.000Z",
       "kickoff_local": "07/14/2026 14:00",
-      "home_id": null,
+      "home_id": "FRA",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
