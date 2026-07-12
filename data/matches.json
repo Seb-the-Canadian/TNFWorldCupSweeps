@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-11T23:42:48.194Z",
+  "fetched_at": "2026-07-12T00:06:39.085Z",
   "matches": [
     {
       "group": "A",
@@ -1581,7 +1581,7 @@
       "kickoff_local": "07/11/2026 17:00",
       "home_id": "NOR",
       "away_id": "ENG",
-      "status": "live",
+      "status": "completed",
       "home_score": 1,
       "away_score": 2,
       "home_pen": null,
@@ -1627,7 +1627,7 @@
       "round": "sf",
       "kickoff_utc": "2026-07-15T19:00:00.000Z",
       "kickoff_local": "07/15/2026 15:00",
-      "home_id": null,
+      "home_id": "ENG",
       "away_id": null,
       "status": "scheduled",
       "home_score": 0,
