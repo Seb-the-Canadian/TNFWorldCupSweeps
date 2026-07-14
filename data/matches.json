@@ -1,6 +1,6 @@
 {
   "source": "worldcup26.ir",
-  "fetched_at": "2026-07-14T20:15:10.420Z",
+  "fetched_at": "2026-07-14T21:07:30.088Z",
   "matches": [
     {
       "group": "A",
@@ -1613,9 +1613,9 @@
       "kickoff_local": "07/14/2026 14:00",
       "home_id": "FRA",
       "away_id": "ESP",
-      "status": "live",
+      "status": "completed",
       "home_score": 0,
-      "away_score": 1,
+      "away_score": 2,
       "home_pen": null,
       "away_pen": null,
       "minute": null
